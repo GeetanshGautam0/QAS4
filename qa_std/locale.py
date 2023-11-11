@@ -1,5 +1,5 @@
 """
-FILE:           qa_inc/locale.py
+FILE:           qa_std/locale.py
 AUTHOR:         Geetansh Gautam
 PROJECT:        Quizzing Application, version 4
 
@@ -25,6 +25,8 @@ DEPENDENCIES
     json
     os
     enum.Enum                   [alias: Enum]
+    .qa_app_pol                 [alias: AppPolicy]
+    .qa_app_info                [alias: AppInfo]
 
 RAISES
 
@@ -43,10 +45,10 @@ RAISES
 
 """
 
-import json, os
 from typing import *
 from dataclasses import dataclass
 from enum import Enum
+from . import qa_app_pol as AppPolicy, qa_app_info as AppInfo
 
 
 class LOCALE(Enum):
@@ -95,29 +97,21 @@ def get_locale() -> Locale:
     if locale_loaded:
         return locale
 
-    # Open the config file
-    if not os.path.isfile('.conf/configuration.json'):
-        raise FileNotFoundError('.conf/configuration.json')
-
-    with open('.conf/configuration.json', 'r') as configuration:
-        config_raw = configuration.read()
-        configuration.close()
-
     # Look for locale information. If it doesn't exist, default to en-US
-    app_locale = json.loads(config_raw).get('settings', {}).get('locale', [0, 'en-US'])
+    app_locale: Tuple[str, str] = AppInfo.ConfigurationFile.config.locale
 
     # Make sure that the data is structured correctly
-    assert isinstance(app_locale, list),    '0x000001'
-    assert len(app_locale) == 2,            '0x000002'
-    assert isinstance(app_locale[0], int),  '0x000003'
-    assert isinstance(app_locale[1], str),  '0x000004'
+    assert isinstance(app_locale, (list, tuple)),   '0x000001'
+    assert len(app_locale) == 2,                    '0x000002'
+    assert isinstance(app_locale[0], int),          '0x000003'
+    assert isinstance(app_locale[1], str),          '0x000004'
 
     # Look for the class that matches with the locale
     if app_locale[0] not in LOCALE_MAP.keys():
         raise FileNotFoundError(f'locale {app_locale[1]}')
 
     # Generate the locale information
-    locale = cast(Locale, LOCALE_MAP[app_locale[0]]())
+    locale = cast(Locale, LOCALE_MAP[app_locale[0]]())  # type: ignore
 
     # Check to make sure that this is the right locale
     locale_name = f'{locale.lang}-{locale.region}'
@@ -126,3 +120,10 @@ def get_locale() -> Locale:
     # All is well; set locale_loaded to true and then return the locale information
     locale_loaded = True
     return locale
+
+
+ScriptPolicy = AppPolicy.PolicyManager.Module('LocaleManager', 'locale.py')
+
+
+if __name__ == "__main__":
+    ScriptPolicy.run_as_main()

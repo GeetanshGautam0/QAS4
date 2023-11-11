@@ -1,5 +1,5 @@
 """
-FILE:           qa_inc/qa_dtc.py
+FILE:           qa_std/qa_dtc.py
 AUTHOR:         Geetansh Gautam
 PROJECT:        Quizzing Application, version 4
 
@@ -18,7 +18,7 @@ DEPENDENCIES
     typing.*
     sys.stderr                  [alias: stderr]
     dataclasses.dataclass       [alias: dataclass]
-    qa_inc.locale               [alias: locale]
+    qa_std.locale               [alias: locale]
 
 """
 

@@ -1,9 +1,14 @@
 {
 
   "build": {
+    "AUTH": ["Geetansh Gautam", "geetansh.ca"],
+    "AVS":  "4.0.0.1",
+    "BT":   0,
+    "BI":   ""
   },
   "settings": {
-    "locale": [0, "en-US"]
+    "locale": [0, "en-US"],
+    "LOG_VERB": false
   }
 
 }
