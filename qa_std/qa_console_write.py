@@ -11,6 +11,7 @@ DEFINES
 
     Type            Name                Input Types                 Output Types            Alias
     ---------------------------------------------------------------------------------------------
+    (dataclass)     ConsoleTheme
     (method)        SetupWinConsole     None                        None
     (method)        CheckOS             None                        qa_def.OS               std.CheckOS
     (class)         Write               None                        None                    W
@@ -24,20 +25,33 @@ DEFINES
 
 DEPENDENCIES
 
-    .qa_theme.ConsoleTheme      [alias: theme]
     .qa_app_pol                 [alias: AppPolicy]
     .qa_def
     .qa_dtc
     sys
     ctypes.windll               [alias: windll]
+    dataclasses.dataclass
 
 """
 
 import sys
 from typing import Any
-from .qa_theme import ConsoleTheme as theme
 from . import qa_app_pol as AppPolicy, qa_def, qa_dtc
 from ctypes import windll
+from dataclasses import dataclass
+
+
+@dataclass
+class ConsoleTheme:
+    BG: str = qa_def.ANSI.BG_BLACK
+    FG: str = qa_def.ANSI.FG_WHITE
+    ER: str = qa_def.ANSI.FG_BRIGHT_RED
+    OK: str = qa_def.ANSI.FG_BRIGHT_GREEN
+    WA: str = qa_def.ANSI.FG_BRIGHT_YELLOW
+    HG: str = qa_def.ANSI.FG_BRIGHT_BLUE
+
+
+theme = ConsoleTheme
 
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('ConsoleWriter', 'qa_console_write.py')

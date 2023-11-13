@@ -1,0 +1,56 @@
+{
+    "meta": {
+        "ThemeFile.FileVersion": 1,
+        "ThemeFile.HeaderVersion": 1,
+        "Theme.Author": "Geetansh Gautam",
+        "Theme.Collection": "Default"
+    },
+    "content": {
+        "Dark Mode": {
+            "Theme.BG": "#202020",
+            "Theme.FG": "#FFFFFF",
+            "Theme.ER": "#FF3A20",
+            "Theme.WA": "#EFCA08",
+            "Theme.OK": "#73AB84",
+            "Theme.AC": "#3CC7F2",
+            "Theme.GR": "#929292",
+            "Theme.Font": {
+                "Theme.Font.TTL_FF": "Monserrat Semibold",
+                "Theme.Font.FF": "Monserrat",
+                "Theme.Font.TTL_FS": 29,
+                "Theme.Font.LRG_FS": 20,
+                "Theme.Font.NRM_FS": 14,
+                "Theme.Font.SML_FS": 10
+            },
+            "Theme.Border": {
+                "Theme.Border.Color": "#000000",
+                "Theme.Border.Radius": 0
+            }
+        },
+        "Light Mode": {
+            "Theme.BG": "#FFFFFF",
+            "Theme.FG": "#000000",
+            "Theme.ER": "#E01A00",
+            "Theme.WA": "#D6A630",
+            "Theme.OK": "#138811",
+            "Theme.AC": "#2DB2E7",
+            "Theme.GR": "#5C5C5C",
+            "Theme.Font": {
+                "Theme.Font.TTL_FF": "Monserrat Semibold",
+                "Theme.Font.FF": "Monserrat",
+                "Theme.Font.TTL_FS": 29,
+                "Theme.Font.LRG_FS": 20,
+                "Theme.Font.NRM_FS": 14,
+                "Theme.Font.SML_FS": 10
+            },
+            "Theme.Border": {
+                "Theme.Border.Color": "#000000",
+                "Theme.Border.Radius": 0
+            }
+        }
+    },
+    "v": {
+        "Theme.CRC32": 3887641410,
+        "Theme.HASH": "17235ac5233502580fab7d7fb451d650f3a97886f1f3a7fa9f86de811602a980"
+    }
+}

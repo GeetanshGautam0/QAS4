@@ -60,8 +60,18 @@ POLICY_SW_GZIP_COMPRESSION_LEVEL = 7
 # ----------------------- Global Settings ------------------------
 # POLICY_MAX_WHILE_LOOP_RETRIES
 #   Specifies the maximum number of times that a loop can be run (specifically a while loop).
+#
+# Default: 10_000
+#
 POLICY_MAX_WHILE_LOOP_RETRIES = 10_000
-
+#
+# POLICY_FO_GEN_THEME_FILE_VERSION
+#   Specifies the version of theme files that is to be generated
+#
+# Default: 1
+#
+POLICY_FO_GEN_THEME_FILE_VERSION = 1
+#
 # ----------------------- Section Complete -----------------------
 
 

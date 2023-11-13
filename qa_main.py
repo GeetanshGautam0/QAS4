@@ -20,7 +20,7 @@ DEPENDENCIES
 
 """
 
-import random, sys
+import random, sys, io
 from typing import Any
 from qa_std import *
 from enum import Enum
@@ -71,21 +71,85 @@ class AppManager:
         sys.stderr = sys.__stderr__
 
 
+def _terminate_app() -> None:
+    # Remove the AppRun flag, if it exists
+    NonvolatileFlags.NVF.remove_flag('AppRun', True)
+
+    try:
+        file_io_manager.iohm.current_task.cancel()
+    except Exception as E:
+        ConsoleWriter.Write.error(f'IOHistManager.CT.CANCEL:', str(E))
+
+    sys.excepthook = sys.__excepthook__
+
+
 if __name__ == "__main__":
     NonvolatileFlags.NVF.create_flag('AppRun')
 
     ErrorManager.RedirectExceptionHandler()
+    # Add a new error hook task that removes the AppRun flag
+    ErrorManager.Minf_EH_Md7182_eHookTasks.append(
+        (lambda is_fatal: is_fatal, lambda: NonvolatileFlags.NVF.remove_flag('AppRun', True))
+    )
+
+    # Add a new error hook task that cancels file_io_manager's IOHistory timer
+    ErrorManager.Minf_EH_Md7182_eHookTasks.append(
+        (lambda is_fatal: is_fatal, file_io_manager.iohm.current_task.cancel)
+    )
+
+    # Check if the script is allowed to run as main (it has to be)
     ScriptPolicy.run_as_main()
+    assert sys.excepthook == ErrorManager._O_exception_hook, 'Exception hook was not redirected.'
 
+    # Test file IO manager
     test_file = qa_def.File('output_text.txt')
-    fio = qa_file_std.FileIO()
+    file_io_manager.write(test_file, f'Hello, World! {random.random()}')
 
-    fio.write(test_file, f'Hello, World! {random.random()}')
+    theme_file = ThemeFile.ThemeFile.generate_file_data(ThemeManager.ThemeFile_s(
+        qa_file_std.HeaderData(
+            b'\x01\xff\x17\x12',
+            b'\x00\x01', 1,
+            b'\x00\x01', 1,
+            qa_file_std.FileType.Theme
+        ),
+        'Geetansh Gautam',
+        'Default',
+        qa_def.File(f'.src\\.theme\\default_themes.{ThemeFile.ThemeFile.extension}'),
+        [
+            ThemeFile.Theme(
+                'Dark Mode',
+                '0xff:0x0001',
+                qa_def.HexColor('#202020'),
+                qa_def.HexColor('#ffffff'),
+                qa_def.HexColor('#73ab84'),
+                qa_def.HexColor('#ff3a20'),
+                qa_def.HexColor('#efca08'),
+                qa_def.HexColor('#3cc7f2'),
+                qa_def.HexColor('#929292'),
+                'Monserrat Semibold', 'Monserrat',
+                29, 20, 14, 10,
+                0, qa_def.HexColor('#000000')
+            ),
+            ThemeFile.Theme(
+                'Light Mode',
+                '0xff:0x0002',
+                qa_def.HexColor('#ffffff'),
+                qa_def.HexColor('#000000'),
+                qa_def.HexColor('#138811'),
+                qa_def.HexColor('#E01A00'),
+                qa_def.HexColor('#D6A630'),
+                qa_def.HexColor('#2DB2E7'),
+                qa_def.HexColor('#5C5C5C'),
+                'Monserrat Semibold', 'Monserrat',
+                29, 20, 14, 10,
+                0, qa_def.HexColor('#000000')
+            )
+        ],
+        0, '0'
+    ))
 
-    NonvolatileFlags.NVF.remove_flag('AppRun', True)
-    try:
-        qa_file_std.IOHistoryManager.current_task.cancel()
+    file_io_manager.write(qa_def.File(f'.src\\.theme\\default_themes.{ThemeFile.ThemeFile.extension}'), theme_file)
 
-    except Exception as E:
-        ConsoleWriter.Write.error(f'IOHistManager.CT.CANCEL:', str(E))
-
+    # Call _terminate_app and exit with code 0
+    _terminate_app()
+    sys.exit(0)

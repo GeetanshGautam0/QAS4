@@ -9,29 +9,17 @@ DOC
 
 DEFINES
 
-    (class)     dataclass       ConsoleTheme
+    (class)     dataclass       Theme
 
 DEPENDENCIES
 
-    dataclasses.dataclass   [alias: dataclass]
-    qa_def
-    qa_app_pol              [alias: AppPolicy]
+    qa_app_pol                              [alias: AppPolicy]
+    qa_file_io.qa_theme_file.Theme
 
 """
 
-from dataclasses import dataclass
-from . import qa_def
 from . import qa_app_pol as AppPolicy
-
-
-@dataclass
-class ConsoleTheme:
-    BG: str = qa_def.ANSI.BG_BLACK
-    FG: str = qa_def.ANSI.FG_WHITE
-    ER: str = qa_def.ANSI.FG_BRIGHT_RED
-    OK: str = qa_def.ANSI.FG_BRIGHT_GREEN
-    WA: str = qa_def.ANSI.FG_BRIGHT_YELLOW
-    HG: str = qa_def.ANSI.FG_BRIGHT_BLUE
+from qa_file_io.qa_theme_file import Theme, ThemeFile_s
 
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('ThemeManager', 'qa_theme.py')

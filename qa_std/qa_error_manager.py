@@ -38,7 +38,7 @@ _tb_buff = ['<%no_tb']
 
 def gen_codes(exception_class, exception_str, tb) -> Tuple[str, str, str]:
     unique_hash = hashlib.md5(
-        f"{time.ctime(time.time())}{tb}{exception_str}{exception_class}{random.random()}".encode()
+        f"{time.ctime(time.time())}{tb}{exception_str}{exception_class}".encode()
     ).hexdigest()
 
     unique_hash = hex(int(unique_hash, 16))
@@ -468,6 +468,9 @@ def InvokeException(exception: ExceptionObject, *exception_arguments, offset=0, 
 
 _O_exceptions = (KeyboardInterrupt, SystemExit)
 _O_map = {
+
+    # Type A (Variables)
+
     ValueError:         (+1100, ExceptionCodes.VALUE_ERROR, '@aOE_dS', '@aCLS_nS', None, (),
                         {'additional_data': f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback'}),
     AttributeError:     (+1010, ExceptionCodes.ATTRIBUTE_ERROR, '@aOE_dS', '@aCLS_nS', None, (),
@@ -476,6 +479,9 @@ _O_map = {
                         {'additional_data': f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback'}),
     NameError:          (+1011, ExceptionCodes.ATTRIBUTE_ERROR, '@aOE_dS', '@aCLS_nS', None, (),
                         {'additional_data': f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback'}),
+
+    # Type B (Files)
+
     EOFError:           (+1000, ExceptionCodes.FILE_RELATED_ERROR, '<@aCLS_nS>: @aOE_dS', (),
                         {'additional_data': f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback'}),
     NotADirectoryError: (+1010, ExceptionCodes.FILE_RELATED_ERROR, '<@aCLS_nS>: @aOE_dS', (),
@@ -486,6 +492,9 @@ _O_map = {
                         {'additional_data': f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback'}),
     FileExistsError:    (+1500, ExceptionCodes.FILE_RELATED_ERROR, '<@aCLS_nS>: @aOE_dS', (),
                         {'additional_data': f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback'}),
+
+    # Type C (General Exceptions)
+
     ArithmeticError:    (+1500, ExceptionCodes.ARITHMETIC_ERROR, '@aCLS_nS', '@aOE_dS',
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
     ZeroDivisionError:  (+1203, ExceptionCodes.ZERO_DIVISION_ERROR, '@aCLS_nS', '@aOE_dS',
@@ -498,6 +507,9 @@ _O_map = {
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
     AssertionError:     (+1011, ExceptionCodes.BASE_EXCEPTION, '@aCLS_nS', '@aOE_dS',
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
+
+    # Type D (System)
+
     MemoryError:        (+1022, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
     RuntimeError:       (+1023, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
@@ -513,6 +525,8 @@ _O_map = {
     PermissionError:    (+1011, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
     RecursionError:     (+1013, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
+                        f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
+    OSError:            (+1033, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
 }
 
@@ -583,6 +597,7 @@ def _O_exception_hook(exception_type: Type[BaseException], value, traceback, _in
 
         elif _re_inst:
             _O_eh_run_tasks(Minf_EH_Md7182_eHookTasks, False)
+            ConsoleWriter.warn('Exception Hook: Weak handling enabled for this exception.')
             return SetupException(ExceptionObject(exception_code, False), *L, *A, **{'offset': offset, **K})
 
         else:

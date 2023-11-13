@@ -44,6 +44,7 @@ Relevant App Policies
 """
 
 import os, random, gzip, hashlib, zlib, shutil
+from dataclasses import dataclass
 from enum import Enum
 from threading import Timer, Thread
 from typing import Any, List, Tuple, Dict
@@ -53,6 +54,78 @@ from cryptography.fernet import Fernet
 
 class FileType(Enum):
     SecureWriteBackup = 0
+    QuizFile = 1
+    AdminFile = 2
+    Theme = 3
+
+
+class BadFileFormat(Exception):
+    def __init__(self, file_format: str, error: str) -> None:
+        assert file_format in FileType._member_names_, 'Invalid file_format.'
+        self.ff = file_format
+        self.e = error
+
+    def __str__(self) -> str:
+        return f'Improper file format for "{self.ff}". {self.e}'
+
+
+@dataclass
+class HeaderSection:
+    SectionName: str
+
+    # SectionStart and SectionLength are both both indices.
+    SectionStart: int
+    SectionLength: int
+
+
+class Header:
+    MAGIC_BYTES = HeaderSection('MAGIC_BYTES', 0, 4)
+    VERSION = HeaderSection('VERSION', 4, 2)
+
+    HEADER_VERSION = HeaderSection('HEADER_VERSION', 6, 2)
+
+    # Used by external functions
+    byteorder = 'big'
+    items = [MAGIC_BYTES, VERSION, HEADER_VERSION]
+
+
+@dataclass
+class HeaderData:
+    MAGIC_BYTES: bytes
+
+    # Version information
+    VERSION_BYTES: bytes
+    VERSION_INT: int
+
+    # Header version information
+    HEADER_VERSION_BYTES: bytes
+    HEADER_VERSION_INT: int
+
+    # File Type information
+    DETECTED_FILE_TYPE: FileType
+
+
+@dataclass
+class HeaderVersionOne(HeaderData):
+    pass
+
+
+# Each file type, except for SecureWriteBackup files, must have one of the following bytes in their header, which
+#   is used to identify the file type.
+
+MagicBytes = {
+    b'\x01\xff\x17\x10': FileType.QuizFile,
+    b'\x01\xff\x17\x11': FileType.AdminFile,
+    b'\x01\xff\x17\x12': FileType.Theme
+}
+
+
+MPV_FIO_923983nfu_MBR = {v: k for k, v in MagicBytes.items()}
+
+
+def GetMagicBytes(file_type: FileType) -> bytes:
+    global MPV_FIO_923983nfu_MBR
+    return MPV_FIO_923983nfu_MBR.get(file_type)
 
 
 class OperationType(Enum):
@@ -87,24 +160,21 @@ class IOHistory:
         self.current_task.cancel()
 
 
-IOHistoryManager: IOHistory
-
-
 class FileIO:
     MPV_FIO_710Nd_enK: Dict[FileType, bytes] = {
         FileType.SecureWriteBackup: b'TniX7J7DK67d4kkNl-6NAz4oFX9gOdGZ502N5-LoNMs='
     }
 
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
+    def __init__(self, IOHistoryManager: IOHistory, *args: Any, **kwargs: Any) -> None:
         """
         FileIO
 
         Contains functions for:
-            1) Reading files
-            2) Writing to files
+            1) Writing to files
 
         Automatically takes care of encryption and decryption.
 
+        :param IOHistoryManager:
         :param args: Misc. args
         :param kwargs: Misc. keyword args
         """
@@ -113,6 +183,7 @@ class FileIO:
         self._ar, self._kw = args, kwargs
 
         self.cfa = qa_dtc.CFA() if not isinstance(self._kw.get('cfa'), qa_dtc.CFA) else self._kw.get('cfa')
+        self.iohm = IOHistoryManager
 
     @staticmethod
     def _write_bytes_to_file_(file: qa_def.File, data: bytes) -> None:
@@ -247,7 +318,7 @@ class FileIO:
         :param offload_to_new_thread: Should the write operation be offloaded to a new thread?
         :param append_delim:    Delimiter used to separated current and new bytes, if append_mode is enabled.
         :raises AssertionError:
-        :return:
+        :return:                Success status as a boolean (unless offloaded to a new thread)
         """
 
         if offload_to_new_thread:
@@ -255,11 +326,10 @@ class FileIO:
             return True
 
         # Add a write event to the IO history
-        IOHistoryManager.add_event(OperationType.WRITE)
+        self.iohm.add_event(OperationType.WRITE)
 
         # Convert data to bytes (taking the locale into account).
         new_bytes = qa_dtc.convert(bytes, data, cfa=self.cfa)
-        delim_bytes = qa_dtc.convert(bytes, append_delim, cfa=self.cfa)
 
         if os.path.isfile(file.file_path):
             # Read in the current bytes in the file, if it exists (soft handling)
@@ -280,8 +350,10 @@ class FileIO:
             assert backup_made, '[SECURE WRITE] Failed to create file backup'
 
         if append_mode:
+            delim_bytes = qa_dtc.convert(bytes, append_delim, cfa=self.cfa)
             new_bytes = (current_bytes + delim_bytes + new_bytes)
 
+        # Release the memory occupied by the following variable(s).
         del current_bytes
 
         try:
