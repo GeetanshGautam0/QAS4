@@ -77,12 +77,15 @@ class HeaderSection:
     SectionStart: int
     SectionLength: int
 
+    # What version of the header is this applicable to?
+    HeaderVersion: Tuple[int]
+
 
 class Header:
-    MAGIC_BYTES = HeaderSection('MAGIC_BYTES', 0, 4)
-    VERSION = HeaderSection('VERSION', 4, 2)
+    MAGIC_BYTES = HeaderSection('MAGIC_BYTES', 0, 4, (1, ))
+    VERSION = HeaderSection('VERSION', 4, 2, (1, ))
 
-    HEADER_VERSION = HeaderSection('HEADER_VERSION', 6, 2)
+    HEADER_VERSION = HeaderSection('HEADER_VERSION', 6, 2, (1, ))
 
     # Used by external functions
     byteorder = 'big'

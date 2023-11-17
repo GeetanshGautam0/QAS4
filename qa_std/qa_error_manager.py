@@ -23,7 +23,8 @@ DEPENDENCIES
     .qa_app_pol                     [alias: AppPolicy]
     dataclasses.dataclass           [alias: dataclass]
     .qa_def.ANSI                    [alias: ANSI]
-
+    .qa_logger
+    
 """
 
 import sys, traceback as tb, hashlib, time, random
@@ -31,9 +32,11 @@ from .qa_def import ANSI, ExceptionCodes, File
 from .qa_console_write import Write as ConsoleWriter, stderr
 from typing import Optional, Any, overload, Union, cast, Type, List, Tuple
 from dataclasses import dataclass
+from . import qa_logger as Logger
 
 
 _tb_buff = ['<%no_tb']
+_global_logger: Optional[Logger.Logger]
 
 
 def gen_codes(exception_class, exception_str, tb) -> Tuple[str, str, str]:
@@ -436,7 +439,7 @@ def SetupException(exception: ExceptionObject, *exception_arguments, offset=0, *
 
 
 def InvokeException(exception: ExceptionObject, *exception_arguments, offset=0, **kwargs) -> None:
-    global _EXC_MAP
+    global _EXC_MAP, _global_logger
 
     try:
         assert not bool([name in _EXC_MAP for name in ExceptionCodes.__members__.values()].count(
@@ -449,9 +452,19 @@ def InvokeException(exception: ExceptionObject, *exception_arguments, offset=0, 
         # qa_logger.normal_logger(
         #     [LoggingPackage(LoggingLevel.ERROR, ei.formatted_string, LOGGING_FILE_NAME, 'QA_MASTER_ERROR_HANDLER')])
 
-        # TODO: Add logger once available
-
-        ConsoleWriter.error(ei.formatted_string)
+        try:
+            _global_logger.write(
+                Logger.LogDataPacket(
+                    'ErrorManager',
+                    Logger.LoggingLevel.L_ERROR,
+                    ei.formatted_string
+                )
+            )
+        except Exception as E:
+            try:
+                ConsoleWriter.error(ei.formatted_string)
+            except:
+                sys.stdout.write(f'{ei.formatted_string}\n')
 
     except Exception as E:
         exception.exception_code = ExceptionCodes.INTERNAL_ERROR

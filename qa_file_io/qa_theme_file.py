@@ -30,12 +30,19 @@ ERRORS
 
     Error Code                  Exception Type          Description
     ----------------------------------------------------------------------------------------------------------
+    Read Header
     * 0x0000:0x0001             BadFileFormat           BadHeader error 1: Header absent/incomplete
     * 0x0000:0x0002             BadFileFormat           BadHeader error 2: Invalid magic bytes
     * 0x0000:0x0003             BadFileFormat           BadHeader error 3: Invalid/unsupported header version
 
+    Read File
     * 0x0001:0x0001             AssertionError          Requested theme file not found.
+    * 0x0001:0x0002             AssertionError          Invalid file version specified.
+    * 0x0001:0x0003             AssertionError          Invalid header version for specified file version.
+    * 0x0001:0x0004             AssertionError          Bad header (read.header_match_case or read.file_match_case)
+    * 0x0001:0x0005             AssertionError          Bad header (struct).
 
+    Generate File Data
     * 0x0011:0x0000             AssertionError          Bad theme header in theme struct (file header)
     * 0x0011:0x0001             AssertionError          Bad theme meta (theme author)
     * 0x0011:0x0002             AssertionError          Bad theme meta (theme author)
@@ -50,9 +57,9 @@ RELEVANT POLICIES
 
 """
 
-import os, io, json, zlib, hashlib
-from typing import cast, List, Literal
-from qa_std import qa_def, qa_app_pol
+import os, io, json, zlib, hashlib, random
+from typing import cast, List, Literal, Dict, Any
+from qa_std import qa_def, qa_app_pol, locale
 from dataclasses import dataclass
 from . qa_file_std import (
     FileIO,
@@ -118,11 +125,14 @@ class ThemeFile_s:
 
 class ThemeFile:
     extension = 'qTheme'
+    _allowed_header_versions = {
+        1: (1, )
+    }
 
     @staticmethod
     def _read_header_(fp: io.BytesIO) -> HeaderData:
 
-        header_length = sum([section.SectionLength for section in cast(List[HeaderSection], Header.items)])
+        header_length = sum([section.SectionLength for section in cast(List[HeaderSection], Header.items) if 1 in section.HeaderVersion])
         header = fp.read(header_length)
 
         if len(header) != header_length:
@@ -158,7 +168,93 @@ class ThemeFile:
                 raise BadFileFormat('Theme', f'0x0000:0x0003 Bad header (VER; {header_version_int})')
 
     @staticmethod
-    def read_file(file: qa_def.File) -> Theme:
+    def _read_version_one_file_(file: qa_def.File, theme_file: Dict[str, Any]) -> ThemeFile_s:
+        assert 'meta' in theme_file
+        assert 'content' in theme_file
+        assert 'v' in theme_file
+
+        v = theme_file.pop('v')
+        meta, content = theme_file['meta'], theme_file['content']
+
+        assert isinstance(v, dict)
+        assert len(theme_file) == 2
+        assert (len(meta) == 4) & (len(content) > 0)
+        assert isinstance(meta, dict) & isinstance(content, dict)
+
+        m_and_c = json.dumps(theme_file).encode()
+        checksum = zlib.crc32(m_and_c)
+        sha3_256 = hashlib.sha3_256(m_and_c).hexdigest()
+
+        del theme_file, m_and_c
+        assert (v['Theme.CRC32'] == checksum) & (v['Theme.HASH'] == sha3_256)
+
+        file_version = meta["ThemeFile.FileVersion"]
+        header_version = meta["ThemeFile.HeaderVersion"]
+        author = meta["Theme.Author"]
+        collection = meta["Theme.Collection"]
+
+        assert isinstance(file_version, int) & isinstance(header_version, int) & \
+               isinstance(author, str) & isinstance(collection, str)
+
+        assert (file_version == 1) & (header_version in ThemeFile._allowed_header_versions[file_version])
+
+        author, collection = author.strip(), collection.strip()
+        assert bool(len(author)) & bool(len(collection))
+
+        themes: List[Theme] = []
+
+        for theme_name, theme in content.items():
+            assert isinstance(theme_name, str)
+            theme_name = theme_name.strip()
+            assert len(theme_name)
+
+            BG = qa_def.HexColor(theme["Theme.BG"])
+            FG = qa_def.HexColor(theme["Theme.FG"])
+            ER = qa_def.HexColor(theme["Theme.ER"])
+            WA = qa_def.HexColor(theme["Theme.WA"])
+            OK = qa_def.HexColor(theme["Theme.OK"])
+            AC = qa_def.HexColor(theme["Theme.AC"])
+            GR = qa_def.HexColor(theme["Theme.GR"])
+            TTL_FF = theme["Theme.Font"]["Theme.Font.TTL_FF"]
+            FF = theme["Theme.Font"]["Theme.Font.FF"]
+            TTL_FS = theme["Theme.Font"]["Theme.Font.TTL_FS"]
+            LRG_FS = theme["Theme.Font"]["Theme.Font.LRG_FS"]
+            NRM_FS = theme["Theme.Font"]["Theme.Font.NRM_FS"]
+            SML_FS = theme["Theme.Font"]["Theme.Font.SML_FS"]
+            BC = qa_def.HexColor(theme["Theme.Border"]["Theme.Border.Color"])
+            BR = theme["Theme.Border"]["Theme.Border.Radius"]
+
+            # An MD5 string and a CRC32 value for the theme + a random number (salt)
+            t_str = json.dumps(theme)
+            t_crc = zlib.crc32(t_str.encode())
+            t_md5 = hashlib.md5(t_str.encode()).hexdigest()
+            t_rnd = random.randint(100_000_000, 999_999_999) % random.randint(10, 20)
+
+            theme_code = f'{t_md5}{t_crc}{t_rnd}'
+            del t_str, t_crc, t_md5, t_rnd
+
+            assert isinstance(TTL_FF, str) & isinstance(FF, str) & isinstance(TTL_FS, int) & \
+                   isinstance(LRG_FS, int) & isinstance(NRM_FS, int) & isinstance(SML_FS, int) & \
+                   isinstance(BR, int)
+
+            themes.append(
+                Theme(
+                    theme_name, theme_code, BG, FG, OK, ER, WA, AC, GR, TTL_FF, FF, TTL_FS, LRG_FS, NRM_FS, SML_FS,
+                    BR, BC
+                )
+            )
+
+        header = HeaderVersionOne(
+            GetMagicBytes(FileType.Theme),
+            (1).to_bytes(Header.VERSION.SectionLength, Header.byteorder), 1,
+            (1).to_bytes(Header.HEADER_VERSION.SectionLength, Header.byteorder), 1,
+            FileType.Theme
+        )
+
+        return ThemeFile_s(header, author, collection, file, themes, checksum, sha3_256)
+
+    @staticmethod
+    def read_file(file: qa_def.File) -> ThemeFile_s:
         """
         Read Theme File
 
@@ -173,11 +269,57 @@ class ThemeFile:
             fp = io.BytesIO(f_in.read())
             f_in.close()
 
+        # 2) Read the header. fp then only contains the theme data (JSON)
         header = ThemeFile._read_header_(fp)
         body = fp.read()
 
+        # 3) Basic checks
+        header_version = header.HEADER_VERSION_INT
+        file_version = header.VERSION_INT
+
+        assert file_version in ThemeFile._allowed_header_versions.keys(), '0x0001:0x0002 Bad file version'
+        assert header_version in ThemeFile._allowed_header_versions[file_version], '0x0001:0x0003 Bad header'
+
+        match header_version:
+            case 1:
+                assert isinstance(header, HeaderVersionOne), '0x0001:0x0005 Bad header'
+
+            case _:
+                raise Exception('0x0001:0x0004 Bad header')
+
+        # 4) Read the json data
+        theme = json.loads(body.decode(locale.get_locale().encoding))
+
+        # 5) Convert the theme data to an appropriate Theme struct
+        match file_version:
+            case 1:
+                return ThemeFile._read_version_one_file_(file, theme)
+
+            case _:
+                raise Exception('0x0001:0x0004 Bad header')
+
     @staticmethod
-    def _gen_version_one_file_(theme_file: ThemeFile_s) -> str:
+    def _create_version_one_header_() -> bytes:
+        # Create a bytearray of the correct length
+        header_length = sum([section.SectionLength for section in Header.items if 1 in section.HeaderVersion])
+        output = bytearray()
+        output += b'\x00' * header_length
+
+        output[Header.MAGIC_BYTES.SectionStart:(Header.MAGIC_BYTES.SectionStart+Header.MAGIC_BYTES.SectionLength)] = \
+            GetMagicBytes(FileType.Theme)
+
+        output[
+            Header.HEADER_VERSION.SectionStart:(Header.HEADER_VERSION.SectionStart + Header.HEADER_VERSION.SectionLength)
+        ] = (1).to_bytes(Header.HEADER_VERSION.SectionLength, Header.byteorder)
+
+        output[
+            Header.VERSION.SectionStart:(Header.VERSION.SectionStart + Header.VERSION.SectionLength)
+        ] = (1).to_bytes(Header.VERSION.SectionLength, Header.byteorder)
+
+        return bytes(output)
+
+    @staticmethod
+    def _gen_version_one_file_(theme_file: ThemeFile_s) -> bytes:
         # Create new HeaderData
         #   Version one theme files only support version one headers.
         #       1) Magic Bytes
@@ -260,10 +402,11 @@ class ThemeFile:
             'Theme.HASH': sha3_256
         }
 
-        return json.dumps(output, indent=4)
+        # Add a version one header and return the output as JSON
+        return ThemeFile._create_version_one_header_() + json.dumps(output, indent=4).encode()
 
     @staticmethod
-    def generate_file_data(theme_file: ThemeFile_s) -> str:
+    def generate_file_data(theme_file: ThemeFile_s) -> bytes:
         match qa_app_pol.POLICY_FO_GEN_THEME_FILE_VERSION:
             case 1:
                 return ThemeFile._gen_version_one_file_(theme_file)

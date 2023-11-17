@@ -48,12 +48,15 @@ class Storage:
     AppSettingsDir = f'{AppDataDir}\\.asd'
     ThemeInstallDir = f'{AppDataDir}\\.tid'
     NonvolatileFlagDir = f'{AppDataDir}\\.nvf'
-
-    ThemeDefaultDir = f'{SourceDirectory}\\.dt'
+    LoggerDir = f'{AppDataDir}\\.log'
+    
+    ThemeDefaultDir = f'{SourceDirectory}\\.theme'
     ConfigurationDefaultDir = f'{SourceDirectory}\\.conf'
 
     ThemeConfigurationFile = f'{AppSettingsDir}\\qt.{QAConfigFileExtension}'
     QuizConfigurationFile = f'{AppSettingsDir}\\qz.{QAConfigFileExtension}'
+
+    DefaultThemeFile = f'{ThemeDefaultDir}\\default_themes.qTheme'
 
 
 class BuildType(Enum):

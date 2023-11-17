@@ -6,6 +6,7 @@ PROJECT:        Quizzing Application, version 4
 DOC
 
     Defines standard console write functions.
+    
 
 DEFINES
 

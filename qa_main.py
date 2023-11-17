@@ -85,8 +85,11 @@ def _terminate_app() -> None:
 
 if __name__ == "__main__":
     NonvolatileFlags.NVF.create_flag('AppRun')
-
     ErrorManager.RedirectExceptionHandler()
+    
+    AppLogger = Logger.Logger()
+    ErrorManager._global_logger = AppLogger
+    
     # Add a new error hook task that removes the AppRun flag
     ErrorManager.Minf_EH_Md7182_eHookTasks.append(
         (lambda is_fatal: is_fatal, lambda: NonvolatileFlags.NVF.remove_flag('AppRun', True))
@@ -101,54 +104,23 @@ if __name__ == "__main__":
     ScriptPolicy.run_as_main()
     assert sys.excepthook == ErrorManager._O_exception_hook, 'Exception hook was not redirected.'
 
-    # Test file IO manager
-    test_file = qa_def.File('output_text.txt')
-    file_io_manager.write(test_file, f'Hello, World! {random.random()}')
-
-    theme_file = ThemeFile.ThemeFile.generate_file_data(ThemeManager.ThemeFile_s(
-        qa_file_std.HeaderData(
-            b'\x01\xff\x17\x12',
-            b'\x00\x01', 1,
-            b'\x00\x01', 1,
-            qa_file_std.FileType.Theme
-        ),
-        'Geetansh Gautam',
-        'Default',
-        qa_def.File(f'.src\\.theme\\default_themes.{ThemeFile.ThemeFile.extension}'),
-        [
-            ThemeFile.Theme(
-                'Dark Mode',
-                '0xff:0x0001',
-                qa_def.HexColor('#202020'),
-                qa_def.HexColor('#ffffff'),
-                qa_def.HexColor('#73ab84'),
-                qa_def.HexColor('#ff3a20'),
-                qa_def.HexColor('#efca08'),
-                qa_def.HexColor('#3cc7f2'),
-                qa_def.HexColor('#929292'),
-                'Monserrat Semibold', 'Monserrat',
-                29, 20, 14, 10,
-                0, qa_def.HexColor('#000000')
-            ),
-            ThemeFile.Theme(
-                'Light Mode',
-                '0xff:0x0002',
-                qa_def.HexColor('#ffffff'),
-                qa_def.HexColor('#000000'),
-                qa_def.HexColor('#138811'),
-                qa_def.HexColor('#E01A00'),
-                qa_def.HexColor('#D6A630'),
-                qa_def.HexColor('#2DB2E7'),
-                qa_def.HexColor('#5C5C5C'),
-                'Monserrat Semibold', 'Monserrat',
-                29, 20, 14, 10,
-                0, qa_def.HexColor('#000000')
-            )
-        ],
-        0, '0'
-    ))
-
-    file_io_manager.write(qa_def.File(f'.src\\.theme\\default_themes.{ThemeFile.ThemeFile.extension}'), theme_file)
+    # --------------------------------------------------------------------------------------------
+    
+    AppLogger.write(
+        Logger.LogDataPacket(
+            'AppInitializer', 
+            Logger.LoggingLevel.L_EMPHASIS, 
+            f'Generated log file {AppLogger._lfile.file_name}'
+        )
+    )
+    
+    raise Exception
+    
+    # --------------------------------------------------------------------------------------------
+    
+    # Testing
+    #   Now, read the file and make sure it passes all test
+    theme_file_struct = ThemeFile.ThemeFile.read_file(qa_def.File(AppInfo.Storage.DefaultThemeFile))
 
     # Call _terminate_app and exit with code 0
     _terminate_app()

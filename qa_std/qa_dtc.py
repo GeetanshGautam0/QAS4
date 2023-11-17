@@ -664,8 +664,8 @@ def convert(output_type: Type, data: Any, *args: Any, **kwargs: Any) -> Any:
     if isinstance(data, output_type):
         return data
 
-    assert isinstance(data, (*DNA, *DA, *CUSTOM)),          '0x000001'
-    assert output_type in (*DNA, *DA, *CUSTOM),             '0x000002'
+    assert isinstance(data, (*DNA, *DA, *CUSTOM)),          f'0x000001 {type(data)}'
+    assert output_type in (*DNA, *DA, *CUSTOM),             f'0x000002 {output_type}'
 
     # Call the function
     return cast(Dict[Type, Any], {
