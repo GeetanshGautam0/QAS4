@@ -448,18 +448,19 @@ def InvokeException(exception: ExceptionObject, *exception_arguments, offset=0, 
         exception_class = _EXC_MAP.get(exception.exception_code, Exceptions.BASE_EXCEPTION)
         ei = exception_class(*exception_arguments, **kwargs, ExpObj=exception, ExpHexOffset=offset)
 
-        # qa_logger.DEBUGGING_ENABLED = True
-        # qa_logger.normal_logger(
-        #     [LoggingPackage(LoggingLevel.ERROR, ei.formatted_string, LOGGING_FILE_NAME, 'QA_MASTER_ERROR_HANDLER')])
-
         try:
-            _global_logger.write(
-                Logger.LogDataPacket(
-                    'ErrorManager',
-                    Logger.LoggingLevel.L_ERROR,
-                    ei.formatted_string
+            if isinstance(_global_logger, Logger.Logger):
+                _global_logger.write(
+                    Logger.LogDataPacket(
+                        'ErrorManager',
+                        Logger.LoggingLevel.L_ERROR,
+                        ei.formatted_string
+                    )
                 )
-            )
+                
+            else:
+                ConsoleWriter.error(ei.formatted_string)
+        
         except Exception as E:
             try:
                 ConsoleWriter.error(ei.formatted_string)

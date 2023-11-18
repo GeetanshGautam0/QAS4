@@ -20,7 +20,7 @@ DEPENDENCIES
 
 """
 
-import random, sys, io
+import sys
 from typing import Any
 from qa_std import *
 from enum import Enum
@@ -87,15 +87,16 @@ if __name__ == "__main__":
     NonvolatileFlags.NVF.create_flag('AppRun')
     ErrorManager.RedirectExceptionHandler()
     
-    AppLogger = Logger.Logger()
+    AppLogger = Logger()
     ErrorManager._global_logger = AppLogger
+    ThemeManager._global_logger = AppLogger
     
-    # Add a new error hook task that removes the AppRun flag
+    # Add a new error hook task that removes the AppRun flag (contingent on whether the error is fatal)
     ErrorManager.Minf_EH_Md7182_eHookTasks.append(
         (lambda is_fatal: is_fatal, lambda: NonvolatileFlags.NVF.remove_flag('AppRun', True))
     )
 
-    # Add a new error hook task that cancels file_io_manager's IOHistory timer
+    # Add a new error hook task that cancels file_io_manager's IOHistory timer (contingent on whether the error is fatal)
     ErrorManager.Minf_EH_Md7182_eHookTasks.append(
         (lambda is_fatal: is_fatal, file_io_manager.iohm.current_task.cancel)
     )
@@ -106,21 +107,19 @@ if __name__ == "__main__":
 
     # --------------------------------------------------------------------------------------------
     
+    
+    
     AppLogger.write(
-        Logger.LogDataPacket(
+        LogDataPacket(
             'AppInitializer', 
-            Logger.LoggingLevel.L_EMPHASIS, 
+            LoggingLevel.L_EMPHASIS, 
             f'Generated log file {AppLogger._lfile.file_name}'
         )
     )
     
-    raise Exception
+    ThemeManager.T_Config._get_pref_theme_()
     
     # --------------------------------------------------------------------------------------------
-    
-    # Testing
-    #   Now, read the file and make sure it passes all test
-    theme_file_struct = ThemeFile.ThemeFile.read_file(qa_def.File(AppInfo.Storage.DefaultThemeFile))
 
     # Call _terminate_app and exit with code 0
     _terminate_app()

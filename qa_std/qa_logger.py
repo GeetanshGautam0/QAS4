@@ -71,7 +71,7 @@ class LogDataPacket:
     data: Any
 
 
-class Logger:
+class Logger(Thread):
     def __init__(self) -> None:
         self.thread = Thread
         self.thread.__init__(self, name="LoggerThread")
@@ -186,7 +186,7 @@ class Logger:
         try:
             self.thread.join(self, 0)
         except Exception as E:
-            ConsoleWriter.Write.error(str(E))
+            pass
     
 
 ModulePolicy = AppPolicy.PolicyManager.Module('Logger', 'qa_logger.py')
