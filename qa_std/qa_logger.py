@@ -40,6 +40,7 @@ LOGGING LEVELS
 
 """
 
+from distutils.log import Log
 import qa_file_io as FileIO
 from . import qa_app_pol as AppPolicy
 from . import qa_app_info as AppInfo
@@ -107,10 +108,28 @@ class Logger(Thread):
                 secure_mode=False,
                 append_mode=True,
                 offload_to_new_thread=False,
-                append_delim='\n\n'
+                append_delim='\n'
             )
         
         self._ready = True
+        
+        self._dump_logger_info_()
+        
+    def _dump_logger_info_(self) -> None:
+        self.write(LogDataPacket('Logger', LoggingLevel.L_GENERAL,  'New logger instance created.'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_GENERAL,  f'    * Log file: {self._lfile.file_name}'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_GENERAL,  f'    THE FOLLOWING LOGGING LEVELS ARE AVAILABLE:'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_ERROR,    f'      Error logging available.'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_WARNING,  f'      Warning logging available.'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_SUCCESS,  f'      Success message logging available.'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_EMPHASIS, f'      Important message logging available.'))
+        self.write(LogDataPacket('Logger', LoggingLevel.L_GENERAL,  f'      General message logging available.'))
+        
+        self.add_empty_line()
+    
+    def add_empty_line(self) -> None:
+        ConsoleWriter.stdout('\n')
+        self.write_to_file('\n')
     
     def write(self, ldp: LogDataPacket) -> None:
         assert self._ready
@@ -123,32 +142,6 @@ class Logger(Thread):
         data_b = qa_dtc.convert(bytes, ldp.data, cfa=FileIO.file_io_manager.cfa)
         
         # Convert the logging level to bytes; make sure to use the same CFA as the file IO manager
-        logging_name_b = qa_dtc.convert(
-            bytes,
-            {
-                LoggingLevel.L_ERROR:       'ERROR',
-                LoggingLevel.L_WARNING:     'WARNING',
-                LoggingLevel.L_GENERAL:     'GENERAL',
-                LoggingLevel.L_SUCCESS:     'SUCCESS',
-                LoggingLevel.L_EMPHASIS:    'IMPORTANT',
-            }[ldp.logging_level],
-            cfa=FileIO.file_io_manager.cfa
-        )
-        
-        # Get the current time and store it as bytes
-        time_b = qa_dtc.convert(bytes, datetime.datetime.now().strftime("ON %b %d %Y AT %H:%M:%S"), cfa=FileIO.file_io_manager.cfa)
-
-        # Append the bytes to form the final bytearray.
-        # Pass a version of the bytes (without the logging level) to the ConsoleWriter (to an appropriate function) 
-        
-        data = b'[%b %b] %b' % (script_b, time_b, data_b)
-        {
-            LoggingLevel.L_ERROR:       ConsoleWriter.Write.error,
-            LoggingLevel.L_WARNING:     ConsoleWriter.Write.warn,
-            LoggingLevel.L_GENERAL:     ConsoleWriter.Write.write,
-            LoggingLevel.L_SUCCESS:     ConsoleWriter.Write.ok,
-            LoggingLevel.L_EMPHASIS:    ConsoleWriter.Write.emphasis,
-        }[ldp.logging_level]('[LOGGED]', data)
         
         # Add a label. Then, theme the message and store it to a log file.
         match ldp.logging_level:
@@ -170,8 +163,46 @@ class Logger(Thread):
             case _:
                 raise Exception('Unexpected logging level')
             
+        logging_name_b = qa_dtc.convert(
+            bytes,
+            {
+                LoggingLevel.L_ERROR:       'ERROR',
+                LoggingLevel.L_WARNING:     'WARNING',
+                LoggingLevel.L_GENERAL:     'GENERAL',
+                LoggingLevel.L_SUCCESS:     'SUCCESS',
+                LoggingLevel.L_EMPHASIS:    'IMPORTANT',
+            }[ldp.logging_level],
+            cfa=FileIO.file_io_manager.cfa
+        )
+        
+        if (12 - len(logging_name_b)) > 0:
+            spaces_b = qa_dtc.convert(bytes, ' ', cfa=FileIO.file_io_manager.cfa) * (12 - len(logging_name_b))
+        else:
+            spaces_b = qa_dtc.convert(bytes, '', cfa=FileIO.file_io_manager.cfa)
+        
+        # Get the current time and store it as bytes
+        time_b = qa_dtc.convert(bytes, datetime.datetime.now().strftime("ON %b %d %Y AT %H:%M:%S"), cfa=FileIO.file_io_manager.cfa)
+
+        # Append the bytes to form the final bytearray.
+        # Pass a version of the bytes (without the logging level) to the ConsoleWriter (to an appropriate function) 
+        
+        data = b'[%b %b] ' % (script_b, time_b)
+        
+        if (50 - len(data)) > 0:
+            data += qa_dtc.convert(bytes, ' ', cfa=FileIO.file_io_manager.cfa) * (50 - len(data))
+        
+        data = b'%b %b' % (data, data_b)
+        
+        {
+            LoggingLevel.L_ERROR:       ConsoleWriter.Write.error,
+            LoggingLevel.L_WARNING:     ConsoleWriter.Write.warn,
+            LoggingLevel.L_GENERAL:     ConsoleWriter.Write.write,
+            LoggingLevel.L_SUCCESS:     ConsoleWriter.Write.ok,
+            LoggingLevel.L_EMPHASIS:    ConsoleWriter.Write.emphasis,
+        }[ldp.logging_level]('[LOGGED]', data)
+        
         ANSI_CODES_b = [qa_dtc.convert(bytes, ac, cfa=FileIO.file_io_manager.cfa) for ac in ANSI_CODES[:3]]
-        prepend_b = b'[%b%b%b%b]' % (ANSI_CODES_b[1], ANSI_CODES_b[0], logging_name_b, ANSI_CODES_b[2])
+        prepend_b = b'[%b%b%b%b]%b' % (ANSI_CODES_b[1], ANSI_CODES_b[0], logging_name_b, ANSI_CODES_b[2], spaces_b)
         
         output_b = b'%b%b %b%b' % (
             prepend_b, 

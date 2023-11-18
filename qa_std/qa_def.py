@@ -17,6 +17,7 @@ DEFINES
     (class)                 HexColor
     (class)                 File
     (class)     -           ANSI
+    (Exception)             NotYetImplemented
 
 DEPENDENCIES
 
@@ -75,6 +76,14 @@ class File:
 
         tokens = file_path.replace("\\", '/').split('/')
         return "\\".join(i for i in tokens[:-1:]), tokens[-1]
+
+
+class NotYetImplemented(Exception):
+    def __init__(self, feature: str) -> None:
+        self.f = feature
+        
+    def __str__(self) -> str:
+        return f'Feature {self.f} has not yet been implemented.'
 
 
 class ANSI:

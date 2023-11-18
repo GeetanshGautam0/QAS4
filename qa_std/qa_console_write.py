@@ -72,7 +72,7 @@ class Write:
         try:
             stderr(
                 theme.ER,
-                '[ERROR]', *[qa_dtc.convert(str, d) for d in data],
+                '[ERROR]    ', *[qa_dtc.convert(str, d) for d in data],
                 qa_def.ANSI.RESET,
                 delim=delim,
                 line_termination=line_termination
@@ -88,7 +88,7 @@ class Write:
         try:
             stdout(
                 theme.OK,
-                f'[{label.strip()}]', *[qa_dtc.convert(str, d) for d in data],
+                f'[{label}]  ', *[qa_dtc.convert(str, d) for d in data],
                 qa_def.ANSI.RESET,
                 delim=delim,
                 line_termination=line_termination
@@ -104,7 +104,7 @@ class Write:
         try:
             stdout(
                 theme.WA,
-                '[WARNING]', *[qa_dtc.convert(str, d) for d in data],
+                '[WARNING]  ', *[qa_dtc.convert(str, d) for d in data],
                 qa_def.ANSI.RESET,
                 delim=delim,
                 line_termination=line_termination
@@ -116,7 +116,7 @@ class Write:
             return True
 
     @staticmethod
-    def emphasis(*data: Any, delim: str = ' ', line_termination: str = '\n', label: str = 'INFO') -> bool:
+    def emphasis(*data: Any, delim: str = ' ', line_termination: str = '\n', label: str = 'IMPORTANT') -> bool:
         try:
             stdout(
                 theme.HG,
@@ -132,11 +132,11 @@ class Write:
             return True
 
     @staticmethod
-    def write(*data: Any, delim: str = ' ', line_termination: str = '\n') -> bool:
+    def write(*data: Any, delim: str = ' ', line_termination: str = '\n', label="GENERAL") -> bool:
         try:
             stdout(
                 theme.FG,
-                *[qa_dtc.convert(str, d) for d in data],
+                f'[{label}]  ', *[qa_dtc.convert(str, d) for d in data],
                 qa_def.ANSI.RESET,
                 delim=delim,
                 line_termination=line_termination

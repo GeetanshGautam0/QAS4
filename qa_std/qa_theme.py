@@ -80,8 +80,7 @@ class T_Config:
             assert loaded_file.collection_name == collection, 'Theme collection not available.'
             
             for theme in loaded_file.themes:
-                print(theme.theme_name, name, theme.theme_code[:32], code)
-                
+                                
                 if (theme.theme_name == name) and (theme.theme_code[:32] == code):
                     _global_logger.write(Logger.LogDataPacket(
                         'ThemeManager',
@@ -139,7 +138,17 @@ class T_DefaultTheme:
     @staticmethod
     def _load_default_theme_file_() -> ThemeFile_s:
         return ThemeFile.read_file(qa_def.File(AppInfo.Storage.DefaultThemeFile))
+
+
+class ThemeInfo:
+    default_themes: List[Theme]
+    preferred_theme: Theme
     
+    @staticmethod
+    def load_all_data() -> None:       
+        ThemeInfo.default_themes = T_DefaultTheme._load_default_themes_()[0]
+        ThemeInfo.preferred_theme = T_Config._get_pref_theme_()
+
 
 if __name__ == "__main__":
     ScriptPolicy.run_as_main()

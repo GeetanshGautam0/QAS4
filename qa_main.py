@@ -21,9 +21,11 @@ DEPENDENCIES
 """
 
 import sys
+
 from typing import Any
-from qa_std import *
 from enum import Enum
+
+from qa_std import *
 from qa_file_io import *
 
 
@@ -71,7 +73,7 @@ class AppManager:
         sys.stderr = sys.__stderr__
 
 
-def _terminate_app() -> None:
+def _terminate_app_() -> None:
     # Remove the AppRun flag, if it exists
     NonvolatileFlags.NVF.remove_flag('AppRun', True)
 
@@ -81,6 +83,27 @@ def _terminate_app() -> None:
         ConsoleWriter.Write.error(f'IOHistManager.CT.CANCEL:', str(E))
 
     sys.excepthook = sys.__excepthook__
+
+
+def _check_for_tickets_() -> None:
+    global AppLogger
+    
+    AppLogger.write(LogDataPacket('AppInitializer', LoggingLevel.L_GENERAL, 'Looking for maintainance tickets.'))
+    
+    flags = NonvolatileFlags.NVF.yield_all_flags()
+    for flag in flags:
+        match flag:
+            case 'TCKT_APP_UPDT':
+                # Ask the user whether to update the app or not.
+                raise qa_def.NotYetImplemented('Update ticket system')
+
+            case 'TCKT_APP_REQ_UPDT':
+                # Update mandatory.
+                AppLogger.write(LogDataPacket('AppInitializer', LoggingLevel.L_WARNING, 'APP UPDATE MANDATED.'))
+                raise qa_def.NotYetImplemented('Update ticket system')
+            
+            case _:
+                pass
 
 
 if __name__ == "__main__":
@@ -106,21 +129,16 @@ if __name__ == "__main__":
     assert sys.excepthook == ErrorManager._O_exception_hook, 'Exception hook was not redirected.'
 
     # --------------------------------------------------------------------------------------------
+     
+    # Check for tickets
+    _check_for_tickets_()
     
-    
-    
-    AppLogger.write(
-        LogDataPacket(
-            'AppInitializer', 
-            LoggingLevel.L_EMPHASIS, 
-            f'Generated log file {AppLogger._lfile.file_name}'
-        )
-    )
-    
-    ThemeManager.T_Config._get_pref_theme_()
+    # Load the theme data
+    ThemeManager._global_logger = AppLogger
+    ThemeManager.ThemeInfo.load_all_data()
     
     # --------------------------------------------------------------------------------------------
 
     # Call _terminate_app and exit with code 0
-    _terminate_app()
+    _terminate_app_()
     sys.exit(0)

@@ -21,6 +21,8 @@ DEPENDENCIES
 """
 
 import zlib, os
+from typing import Generator
+
 from . import qa_app_info
 
 
@@ -90,3 +92,12 @@ class NVF:
         assert NVF.check_flag(flag_name) == (n - 1)
 
         return n - 1
+
+    @staticmethod
+    def yield_all_flags() -> Generator:
+        if not os.path.isdir(qa_app_info.Storage.NonvolatileFlagDir):
+            yield None
+            
+        for flag in os.listdir(qa_app_info.Storage.NonvolatileFlagDir):
+            yield flag
+    
