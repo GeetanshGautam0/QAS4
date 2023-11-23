@@ -542,6 +542,8 @@ _O_map = {
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
     OSError:            (+1033, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
+    IOError:            (+1039, ExceptionCodes.INTERNAL_ERROR, 'INTERNAL_ERROR: @aCLS_nS', '@aOE_dS',
+                        f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
 }
 
 Minf_EH_Md7182_eHookTasks_PRE = []

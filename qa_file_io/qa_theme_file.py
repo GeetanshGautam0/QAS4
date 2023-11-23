@@ -58,9 +58,23 @@ RELEVANT POLICIES
 """
 
 import os, io, json, zlib, hashlib, random
-from typing import cast, List, Literal, Dict, Any
-from qa_std import qa_def, qa_app_pol, locale
+
+from typing import (
+    cast, 
+    Literal, 
+    List, 
+    Dict, 
+    Any
+)
+
 from dataclasses import dataclass
+
+from qa_std import (
+    qa_def, 
+    qa_app_pol, 
+    locale
+)
+
 from . qa_file_std import (
     FileIO,
     FileType,
@@ -118,7 +132,7 @@ class ThemeFile_s:
     # Content
     themes: List[Theme]
 
-    # V
+    # Validation data
     CHECKSUM: int
     SHA3_256: str
 
@@ -288,7 +302,7 @@ class ThemeFile:
                 raise Exception('0x0001:0x0004 Bad header')
 
         # 4) Read the json data
-        theme = json.loads(body.decode(locale.get_locale().encoding))
+        theme = json.loads(body.decode(cast(str, locale.get_locale().encoding)))
 
         # 5) Convert the theme data to an appropriate Theme struct
         match file_version:

@@ -63,6 +63,16 @@ class HexColor:
         return str(res) if res is not None else None
 
 
+class ConvertColor:
+    @staticmethod
+    def HexToRGB(color: str) -> Tuple[int, ...]:
+        return tuple(int("".join(i for i in re.findall(r"\w", color))[j:j + 2], 16) for j in (0, 2, 4))
+
+    @staticmethod
+    def RGBToHex(rgb: Tuple[int, ...]) -> str:
+        return "#%02x%02x%02x" % rgb
+
+
 class File:
     def __init__(self, file_path: str):
         assert isinstance(file_path, str)

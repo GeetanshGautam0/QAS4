@@ -39,7 +39,7 @@ class FailureToComplyWithPolicy(Exception):
 #
 # Default: 1000
 #
-POLICY_MAX_IO_EVENTS_PER_MINUTE = 1000
+POLICY_MAX_IO_EVENTS_PER_MINUTE = 15_000
 #
 # POLICY_FIO_SW_COMPRESS_SRC_FILE
 #   Specifies whether the secure write function should compress source files (if secure write mode is enabled)
@@ -63,7 +63,7 @@ POLICY_SW_GZIP_COMPRESSION_LEVEL = 7
 #
 # Default: 10_000
 #
-POLICY_MAX_WHILE_LOOP_RETRIES = 10_000
+POLICY_MAX_WHILE_LOOP_RETRIES = 100_000
 #
 # POLICY_FO_GEN_THEME_FILE_VERSION
 #   Specifies the version of theme files that is to be generated

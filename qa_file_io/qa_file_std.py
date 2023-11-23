@@ -44,12 +44,22 @@ Relevant App Policies
 """
 
 import os, random, gzip, hashlib, zlib, shutil
-from dataclasses import dataclass
+
 from enum import Enum
 from threading import Timer, Thread
-from typing import Any, List, Tuple, Dict
-from qa_std import qa_def, qa_dtc, qa_app_info, qa_app_pol, locale, qa_console_write, qa_nvf_manager
 from cryptography.fernet import Fernet
+from dataclasses import dataclass
+from typing import Any, List, Tuple, Dict, Literal
+
+from qa_std import (
+    qa_def,
+    qa_dtc,
+    qa_app_info,
+    qa_app_pol,
+    locale,
+    qa_console_write,
+    qa_nvf_manager
+)
 
 
 class FileType(Enum):
@@ -82,13 +92,13 @@ class HeaderSection:
 
 
 class Header:
-    MAGIC_BYTES = HeaderSection('MAGIC_BYTES', 0, 4, (1, ))
-    VERSION = HeaderSection('VERSION', 4, 2, (1, ))
+    MAGIC_BYTES = HeaderSection('MAGIC_BYTES', 0, 4, (1,))
+    VERSION = HeaderSection('VERSION', 4, 2, (1,))
 
-    HEADER_VERSION = HeaderSection('HEADER_VERSION', 6, 2, (1, ))
+    HEADER_VERSION = HeaderSection('HEADER_VERSION', 6, 2, (1,))
 
     # Used by external functions
-    byteorder = 'big'
+    byteorder: Literal['big', 'little'] = 'big'
     items = [MAGIC_BYTES, VERSION, HEADER_VERSION]
 
 
@@ -122,13 +132,12 @@ MagicBytes = {
     b'\x01\xff\x17\x12': FileType.Theme
 }
 
-
-MPV_FIO_923983nfu_MBR = {v: k for k, v in MagicBytes.items()}
+MPV_FIO_923983nfu_MBR: Dict[FileType, bytes] = {v: k for k, v in MagicBytes.items()}
 
 
 def GetMagicBytes(file_type: FileType) -> bytes:
     global MPV_FIO_923983nfu_MBR
-    return MPV_FIO_923983nfu_MBR.get(file_type)
+    return MPV_FIO_923983nfu_MBR[file_type]
 
 
 class OperationType(Enum):
@@ -156,8 +165,11 @@ class IOHistory:
             (op_type, len(self._buffer) * random.randint(1001, 9999))
         )
 
-        if len(self._buffer) > qa_app_pol.POLICY_MAX_IO_EVENTS_PER_MINUTE / 6:
-            raise IOError(f'Too many IO events in one minute (> {qa_app_pol.POLICY_MAX_IO_EVENTS_PER_MINUTE})')
+        if len(self._buffer) > qa_app_pol.POLICY_MAX_IO_EVENTS_PER_MINUTE // 6:
+            raise IOError(
+                'Too many IO events in 10 sec. ' +
+                f'({len(self._buffer)} > {qa_app_pol.POLICY_MAX_IO_EVENTS_PER_MINUTE // 6})'
+            )
 
     def __del__(self) -> None:
         self.current_task.cancel()
@@ -372,7 +384,6 @@ class FileIO:
 
         except Exception as E:
             # Log the error in the console as an error (logger not setup as of now).
-            # TODO: replace with a log command once logger is implemented.
 
             qa_console_write.Write.error('Failed to write data to output file: ', str(E))
 

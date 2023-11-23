@@ -73,6 +73,9 @@ class LogDataPacket:
 
 
 class Logger(Thread):
+    @property
+    def FIO(self): return FileIO
+
     def __init__(self) -> None:
         self.thread = Thread
         self.thread.__init__(self, name="LoggerThread")
