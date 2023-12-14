@@ -8,7 +8,7 @@
   },
   "settings": {
     "locale": [0, "en-US"],
-    "LOG_VERB": false
+    "LOG_VERB": true
   }
 
 }

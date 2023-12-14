@@ -31,7 +31,7 @@ from qa_file_io import file_io_manager as FileIOManager
 
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('ThemeManager', 'qa_theme.py')
-_default_theme_code = '8b4bac983936ee43b0c1442b5273b4b7'[:32]
+_default_theme_code = '5a95015ab1713b6a18ebb1750d04434730358774015'[:32]
 _global_logger: Logger.Logger
 
 

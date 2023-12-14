@@ -344,7 +344,7 @@ class ThemeFile:
         header_version = (1).to_bytes(Header.HEADER_VERSION.SectionLength, Header.byteorder)
         file_version = (1).to_bytes(Header.VERSION.SectionLength, Header.byteorder)
 
-        assert HeaderData(magic_bytes, file_version, 1, header_version, 1, FileType.Theme) == theme_file.header, \
+        assert HeaderVersionOne(magic_bytes, file_version, 1, header_version, 1, FileType.Theme) == theme_file.header, \
             '0x0011:0x0000 Bad theme'
 
         assert isinstance(theme_file.author, str), '0x0011:0x0001 Bad theme'

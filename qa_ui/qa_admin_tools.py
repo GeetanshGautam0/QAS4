@@ -20,10 +20,24 @@ DEPENDENCIES
 """
 
 import tkinter as tk
+from tkinter import ttk
+from typing import Optional, cast, Union, List
+from enum import Enum
 
 import qa_std as STD
-import qa_file_io as FileIO
+from qa_std.qa_def import UpdateVariables as uV, UpdateCommand as uC
 from .qa_ui_def import UI_OBJECT
+
+
+_admin_tools_logger: Optional[STD.Logger] = None
+
+
+class FrameID(Enum):
+    (
+        SELECTION_FRAME,
+        CONFIGURE_FRAME,
+        SCORE_MNG_FRAME
+    ) = range(3)
 
 
 class _UI(UI_OBJECT):
@@ -35,12 +49,39 @@ class _UI(UI_OBJECT):
         self.screen_size = (self._master.winfo_screenwidth(), self._master.winfo_screenheight())
         ws_rat = 4/3
 
-        self.window_size = [self.screen_size[0] // 1.5]
+        self.window_size = [self.screen_size[0] // 1.75]
         self.window_size.append(self.window_size[0] // ws_rat)
         self.window_pos = [
             self.screen_size[0] // 2 - self.window_size[0] // 2,
-            self.screen_size[1] // 2 - self.window_size[1] // 30 * 17
+            self.screen_size[1] // 2 - self.window_size[1] // (30 / 17)
         ]
+
+        self._theme: Optional[STD.ThemeManager.Theme] = None
+        self.inputs: List[
+            tk.Button, tk.Radiobutton, tk.Checkbutton, tk.Entry, tk.Text,
+            ttk.Button, ttk.Radiobutton, ttk.Checkbutton, ttk.Entry,
+        ] = []
+
+        self._data = {
+            FrameID.SELECTION_FRAME: {
+                '_upt_req_submitted': False
+            },
+            FrameID.CONFIGURE_FRAME: {
+                '_upt_req_submitted': False
+            },
+            FrameID.SCORE_MNG_FRAME: {
+                '_upt_req_submitted': False
+            },
+        }
+
+        # Tkinter Elements
+        #       Frames
+        self.selection_frame = tk.Frame(self._top_level)
+        self.configure_frame = tk.Frame(self._top_level)
+        self.score_mng_frame = tk.Frame(self._top_level)
+
+        #       Selection Frame
+        self.sel_frame_title = tk.Label(self.selection_frame)
 
         super(_UI, self).__init__()
 
@@ -58,18 +99,176 @@ class _UI(UI_OBJECT):
         self.join(0)
         return True
 
+    @staticmethod
+    def log(ldp: STD.LogDataPacket) -> None:
+        global _admin_tools_logger
+        _admin_tools_logger.write(ldp)
+
     def run(self) -> None:
         self.toplevel.geometry('%dx%d+%d+%d' % (
             self.window_size[0], self.window_size[1], self.window_pos[0], self.window_pos[1]
         ))
 
-        self.toplevel.title('Quizzing Application 3 | Administrator Tools')
+        self.toplevel.title('Quizzing Application 4 | Administrator Tools')
+        self.toplevel.iconbitmap(STD.AppInfo.File.AdminToolsAppICO)
+
+        # Setup padding
+        self.pad_x = 20 if 20 < self.window_size[0] / 20 else 0  # PadX = 20 if 20 < 5% of the window width, else 0
+        self.pad_y = 10 if 10 < self.window_size[1] / 20 else 0  # PadX = 10 if 10 < 5% of the window height, else 0
+
+        # Create update requests
+        self._crt_updt_req_frame(self._top_level)  # Create an update req for _top_level
+
+        # Set the current frame to be the selection frame.
+        self.set_frame(FrameID.SELECTION_FRAME)
+
+        self.update_ui()
+
+    # Setting up frames
+    def set_frame(self, frame: FrameID):
+        assert frame in (FrameID.SELECTION_FRAME, FrameID.SCORE_MNG_FRAME, FrameID.CONFIGURE_FRAME), 'Unsupported frame'
+
+        self.disable_all_inputs()
+
+        self.selection_frame.pack_forget()
+        self.configure_frame.pack_forget()
+        self.score_mng_frame.pack_forget()
+
+        {
+            FrameID.SELECTION_FRAME: self._set_frame_sel,
+            FrameID.CONFIGURE_FRAME: self._set_frame_con,
+            FrameID.SCORE_MNG_FRAME: self._set_frame_scr
+        }[frame]()
+
+        self.enable_all_inputs()
+
+    #       Database Selection Frame
+
+    def _set_frame_sel(self) -> None:
+        # Configure the placement of elements
+        self.selection_frame.pack(fill=tk.BOTH, expand=True)
+
+        if not self._data[FrameID.SELECTION_FRAME]['_upt_req_submitted']:
+            self._theme_frame_sel()
+
+            # This is the first time this function has been called; place the elements in the frame.
+            self.sel_frame_title.config(text='Administrator Tools')
+            self.sel_frame_title.pack(fill=tk.X, expand=True, padx=self.pad_x, pady=self.pad_y)
+
+        self._data[FrameID.SELECTION_FRAME]['_upt_req_submitted'] = True
+
+    def _theme_frame_sel(self) -> None:
+        # Submit theme update requests for the selection frame
+        self._crt_updt_req_frame(self.selection_frame)
+        self._crt_updt_req_label(
+            self.sel_frame_title,
+            fg=uV.ACCENT_COLOR,
+            font_size=uV.TITLE_FONT_SIZE,
+            font_face=uV.TITLE_FONT_FACE
+        )
+
+        # Misc. configuration
+        self.update_requests.append(
+            [
+                self.sel_frame_title,
+                [
+                     uC.CUSTOM,
+                     [
+                         lambda e, w, px: e.config(wraplength=(w-2*px)),
+                        'ELMNT', 'WND_W', 'PAD_X'
+                     ]
+                ]
+             ]
+        )
+
+    #       Configuration Management Frame
+
+    def _set_frame_con(self) -> None:
+        self.configure_frame.pack(fill=tk.BOTH, expand=True)
+
+        if not self._data[FrameID.CONFIGURE_FRAME]['_upt_req_submitted']:
+            self._theme_frame_con()
+
+        self._data[FrameID.CONFIGURE_FRAME]['_upt_req_submitted'] = True
+
+    def _theme_frame_con(self) -> None:
+        pass
+
+    #       Score Management Frame
+
+    def _set_frame_scr(self) -> None:
+        self.score_mng_frame.pack(fill=tk.BOTH, expand=True)
+
+        if not self._data[FrameID.SCORE_MNG_FRAME]['_upt_req_submitted']:
+            self._theme_frame_scr()
+
+        self._data[FrameID.SCORE_MNG_FRAME]['_upt_req_submitted'] = True
+
+    def _theme_frame_scr(self) -> None:
+        pass
+
+    # Input management
+    def enable_all_inputs(self, *exclude_inputs: Union[tk.Button | tk.Radiobutton | tk.Entry | tk.Text]) -> None:
+        for inp in self.inputs:
+            if inp not in exclude_inputs:
+                try:
+                    inp.config(state=tk.NORMAL)
+                except Exception as E:
+                    self.log(
+                        STD.LogDataPacket('AdminToolsUI', STD.LoggingLevel.L_ERROR, f'Failed to enable input {inp}')
+                    )
+
+    def disable_all_inputs(self, *exclude_inputs: Union[tk.Button | tk.Radiobutton | tk.Entry | tk.Text]) -> None:
+        for inp in self.inputs:
+            if inp not in exclude_inputs:
+                try:
+                    inp.config(state=tk.DISABLED)
+                except Exception as E:
+                    self.log(
+                        STD.LogDataPacket('AdminToolsUI', STD.LoggingLevel.L_ERROR, f'Failed to disable input {inp}')
+                    )
+
+    # Functions to create update requests
+    # The syntax for adding an update request:
+    #
+    #       [... [ELEMENT, [COMMAND, [ARGS]], ...]]
+
+    def _crt_updt_req_frame(
+            self,
+            frame: tk.Toplevel | tk.Frame
+    ) -> None:
+        self.update_requests.append(
+            [
+                cast(tk.Widget, frame),
+                [uC.BACKGROUND, [uV.BACKGROUND]]
+            ]
+        )
+
+    def _crt_updt_req_label(
+            self,
+            label: tk.Label | tk.LabelFrame,
+            bg: str | uV = uV.BACKGROUND,
+            fg: str | uV = uV.FOREGROUND,
+            font_size: int | uV = uV.NORML_FONT_SIZE,
+            font_face: str | uV = uV.FONT_FACE,
+    ) -> None:
+        self.update_requests.append(
+            [
+                label,
+                [uC.BACKGROUND, [bg]],
+                [uC.FOREGROUND, [fg]],
+                [uC.FONT, (font_face, font_size)],
+            ]
+        )
 
 
 ModuleScript = STD.AppPolicy.PolicyManager.Module('AdminTools', 'qa_admin_tools.py')
 
 
-def RunApp(AppInstance: object, master: tk.Tk) -> _UI:
+def RunApp(AppInstance: object, master: tk.Tk, logger: STD.Logger) -> _UI:
+    global _admin_tools_logger
+
+    _admin_tools_logger = logger
     return _UI(AppInstance, master)
 
 

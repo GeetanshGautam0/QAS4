@@ -182,3 +182,39 @@ class ANSI:
     UNDERLINE = '\x1b[4m'
     REVERSED = '\x1b[7m'
     RESET = '\x1b[0m'
+
+
+class UpdateCommand(Enum):
+    (
+
+        BACKGROUND,
+        FOREGROUND,
+        BORDER_COLOR,
+        BORDER_WIDTH,
+        FONT,
+        CUSTOM
+
+    ) = range(6)
+
+
+class UpdateVariables(Enum):
+    (
+
+        BACKGROUND,
+        FOREGROUND,
+        BORDER_COLOR,
+        BORDER_WIDTH,
+        ACCENT_COLOR,
+        ERROR_COLOR,
+        WARNING_COLOR,
+        GRAY_COLOR,
+        OK_COLOR,
+        FONT_FACE,
+        TITLE_FONT_FACE,
+        TITLE_FONT_SIZE,
+        LARGE_FONT_SIZE,
+        NORML_FONT_SIZE,
+        SMALL_FONT_SIZE
+
+    ) = range(15)
+
