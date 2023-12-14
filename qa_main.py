@@ -47,7 +47,7 @@ class AppID(Enum):
 
 
 class AppManager:
-    RunAppFunctions: Dict[AppID, Callable[[object, tk.Tk], UI_OBJECT]] = {
+    RunAppFunctions: Dict[AppID, Callable[[object, tk.Tk, Logger], UI_OBJECT]] = {
         AppID.AdminTools: RunAdminTools
     }
 
@@ -135,6 +135,8 @@ class AppManager:
             ))
 
     def run(self) -> None:
+        global AppLogger
+
         if isinstance(self._ui, UI_OBJECT):
             return
 
@@ -142,7 +144,7 @@ class AppManager:
         self._tk_master.withdraw()
         self._tk_master.title('Quizzing App | App Instance Manager (AIM)')
 
-        self._ui = AppManager.RunAppFunctions[self.app_id](self, self._tk_master)
+        self._ui = AppManager.RunAppFunctions[self.app_id](self, self._tk_master, AppLogger)
 
         self._tk_master.protocol('WM_DELETE_WINDOW', self._on_app_close)
         self._ui.toplevel.protocol('WM_DELETE_WINDOW', self._on_app_close)
@@ -176,7 +178,7 @@ def _terminate_app_(**kwargs) -> None:
     except Exception as E:
         ConsoleWriter.Write.error(f'IOHistManager.CT.CANCEL:', str(E))
 
-    if kwargs.get('redirect_exception_hook', True):
+    if kwargs.get('redirect_exception_hook', False):
         sys.excepthook = sys.__excepthook__
 
 
@@ -273,6 +275,7 @@ def _run_essential_diagnostics_() -> None:
     * F001:000A (AC.DTC)
     * F001:000B (AC.DTC)
     * F001:000C (AC.DTC)
+    * F001:000D (AC.File.SOURCE_FILES)
 
     :return: None
     """
@@ -283,6 +286,7 @@ def _run_essential_diagnostics_() -> None:
     assert Diagnostics.ModDiagnostics.locale(), 'Diagnostic failed.'
     assert Diagnostics.ModDiagnostics.qa_def(), 'Diagnostic failed.'
     assert Diagnostics.ModDiagnostics.qa_dtc(), 'Diagnostic failed.'
+    assert Diagnostics.ModDiagnostics.check_source_files(), 'Diagnostic failed.'
 
 
 if __name__ == "__main__":
@@ -312,7 +316,7 @@ if __name__ == "__main__":
 
     # Check for tickets
     _check_for_tickets_()
-    
+
     # Load the theme data
     ThemeManager._global_logger = AppLogger
     ThemeManager.ThemeInfo.load_all_data()
@@ -325,6 +329,6 @@ if __name__ == "__main__":
 
     # --------------------------------------------------------------------------------------------
 
-    # Call _terminate_app and exit with code 0
-    _terminate_app_()
+    # Call _terminate_app_ and exit with code 0
+    _terminate_app_(redirect_exception_hook=True)
     sys.exit(0)

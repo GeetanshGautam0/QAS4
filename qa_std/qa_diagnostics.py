@@ -21,6 +21,7 @@ DEPENDENCIES
 from . import locale as M_locale
 from . import qa_def as M_qa_def
 from . import qa_dtc as M_qa_dtc
+from . import qa_app_info as M_qa_app_info
 
 from . import qa_logger as Logger
 from . import qa_app_pol as AppPolicy
@@ -265,6 +266,32 @@ class ModDiagnostics:
     @staticmethod
     def qa_dtc() -> bool:
         return ModDiagnostics._qa_dtc_to_bytes()
+
+    # Test 0xF001:0x000D
+    #       Check if all source files are present
+
+    @staticmethod
+    def check_source_files() -> bool:
+        global _global_logger
+
+        if M_qa_app_info.File._check_files():
+            _global_logger.write(
+                Logger.LogDataPacket(
+                    'Diagnostics',
+                    Logger.LoggingLevel.L_SUCCESS,
+                    'DIAG <0xF001:0x000D> "A.FILE:SRC_FILES" PASS'
+                )
+            )
+            return True
+
+        _global_logger.write(
+            Logger.LogDataPacket(
+                'Diagnostics',
+                Logger.LoggingLevel.L_ERROR,
+                'DIAG <0xF001:0x000D> "A.FILE:SRC_FILES" FAIL'
+            )
+        )
+        return False
 
 
 class GeneralDiagnostics:

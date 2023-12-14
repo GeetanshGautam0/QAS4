@@ -16,6 +16,12 @@ DEFINES
     (class)                         ConfigurationFile                                                           CF
     (method)                        CF.load_file
 
+RAISES
+
+    Error Type                  Error Code              Error Description
+    -------------------------------------------------------------------------------------------------------------------
+    AssertionError              0x100F:0x0000           Source files (Files) not present.
+
 DEPENDENCIES
 
     josn
@@ -119,4 +125,40 @@ class ConfigurationFile:
 
 
 ConfigurationFile.load_file()
+
+
+class File:
+    AdminToolsAppICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\admn_t.ico'
+    QuizzingToolAppICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\qz_t.ico'
+    UtilitiesAppICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\util.ico'
+    SetupAppICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\setup.ico'
+    UpdaterAppICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\updater.ico'
+
+    AdminToolsFileICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\admn_file.ico'
+    LogFileICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\log.ico'
+    BackupFileICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\backup_file.ico'
+    QuizFileICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\qz_file.ico'
+    ScoreFileICO = f'{Storage.SourceDirectory}\\.ico\\.app_ico\\scr_file.ico'
+
+    @staticmethod
+    def _check_files() -> bool:
+        o = True
+        for f in (
+            File.AdminToolsFileICO,
+            File.QuizzingToolAppICO,
+            File.UtilitiesAppICO,
+            File.SetupAppICO,
+            File.UpdaterAppICO,
+            File.AdminToolsAppICO,
+            File.LogFileICO,
+            File.BackupFileICO,
+            File.QuizFileICO,
+            File.ScoreFileICO
+        ):
+            o &= os.path.exists(f)
+
+        return o
+
+
+assert File._check_files(), '0x100F:0x0000 - Source files not present.'
 

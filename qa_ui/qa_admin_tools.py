@@ -20,10 +20,14 @@ DEPENDENCIES
 """
 
 import tkinter as tk
+from typing import Optional, cast
 
 import qa_std as STD
 import qa_file_io as FileIO
 from .qa_ui_def import UI_OBJECT
+
+
+_admn_t_global_logger: Optional[STD.Logger] = None
 
 
 class _UI(UI_OBJECT):
@@ -42,6 +46,8 @@ class _UI(UI_OBJECT):
             self.screen_size[1] // 2 - self.window_size[1] // 30 * 17
         ]
 
+        self._theme: Optional[STD.ThemeManager.Theme] = None
+
         super(_UI, self).__init__()
 
     def __del__(self) -> None:
@@ -58,18 +64,39 @@ class _UI(UI_OBJECT):
         self.join(0)
         return True
 
+    @staticmethod
+    def log(ldp: STD.LogDataPacket) -> None:
+        global _admn_t_global_logger
+        _admn_t_global_logger.write(ldp)
+
     def run(self) -> None:
         self.toplevel.geometry('%dx%d+%d+%d' % (
             self.window_size[0], self.window_size[1], self.window_pos[0], self.window_pos[1]
         ))
 
         self.toplevel.title('Quizzing Application 3 | Administrator Tools')
+        self.toplevel.iconbitmap(STD.AppInfo.File.AdminToolsAppICO)
+
+        self.update_requests.append(
+            [
+                cast(tk.Widget, self.toplevel),
+                [
+                    STD.qa_def.UpdateCommand.BACKGROUND,
+                    [STD.qa_def.UpdateVariables.BACKGROUND]
+                ]
+            ]
+        )
+
+        self.update_ui()
 
 
 ModuleScript = STD.AppPolicy.PolicyManager.Module('AdminTools', 'qa_admin_tools.py')
 
 
-def RunApp(AppInstance: object, master: tk.Tk) -> _UI:
+def RunApp(AppInstance: object, master: tk.Tk, logger: STD.Logger) -> _UI:
+    global _admn_t_global_logger
+
+    _admn_t_global_logger = logger
     return _UI(AppInstance, master)
 
 
