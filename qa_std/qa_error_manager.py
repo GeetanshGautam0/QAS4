@@ -27,11 +27,13 @@ DEPENDENCIES
     
 """
 
-import sys, traceback as tb, hashlib, time, random
+import sys, traceback as tb, hashlib, time
+
 from .qa_def import ANSI, ExceptionCodes, File
 from .qa_console_write import Write as ConsoleWriter, stderr
 from typing import Optional, Any, overload, Union, cast, Type, List, Tuple
 from dataclasses import dataclass
+
 from . import qa_logger as Logger
 
 
@@ -41,12 +43,12 @@ _global_logger: Optional[Logger.Logger]
 
 def gen_codes(exception_class, exception_str, tb) -> Tuple[str, str, str]:
     unique_hash = hashlib.md5(
-        f"{time.ctime(time.time())}{tb}{exception_str}{exception_class}".encode()
+        f"{time.ctime(time.time())}{tb}{exception_str}{exception_class.__class__.__name__}".encode()
     ).hexdigest()
 
     unique_hash = hex(int(unique_hash, 16))
-    error_hash = hex(int(hashlib.md5(f"{exception_class}".encode()).hexdigest(), 16))
-    std_hash = hex(int(hashlib.md5(f"{exception_class}{exception_str}".encode()).hexdigest(), 16))
+    error_hash = hex(int(hashlib.md5(f"{exception_class.__class__.__name__}".encode()).hexdigest(), 16))
+    std_hash = hex(int(hashlib.md5(f"{exception_class.__class__.__name__}{exception_str}".encode()).hexdigest(), 16))
 
     return error_hash, unique_hash, std_hash
 

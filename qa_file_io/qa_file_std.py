@@ -49,7 +49,7 @@ from enum import Enum
 from threading import Timer, Thread
 from cryptography.fernet import Fernet
 from dataclasses import dataclass
-from typing import Any, List, Tuple, Dict, Literal
+from typing import Any, List, Tuple, Dict, Literal, Optional
 
 from qa_std import (
     qa_def,
@@ -176,6 +176,7 @@ class IOHistory:
 
 
 class FileIO:
+
     MPV_FIO_710Nd_enK: Dict[FileType, bytes] = {
         FileType.SecureWriteBackup: b'TniX7J7DK67d4kkNl-6NAz4oFX9gOdGZ502N5-LoNMs='
     }
@@ -317,7 +318,8 @@ class FileIO:
             secure_mode: bool = True,
             append_mode: bool = False,
             offload_to_new_thread: bool = False,
-            append_delim: str = '\n'
+            append_delim: str = '\n',
+            th: Optional[Thread] = None
     ) -> bool:
 
         """
@@ -336,8 +338,8 @@ class FileIO:
         :return:                Success status as a boolean (unless offloaded to a new thread)
         """
 
-        if offload_to_new_thread:
-            Thread(target=lambda: self.write(file, data, secure_mode, append_mode, False)).start()
+        if offload_to_new_thread and not isinstance(th, Thread):
+            th = Thread(target=lambda: self.write(file, data, secure_mode, append_mode, False)).start()
             return True
 
         # Add a write event to the IO history
@@ -398,5 +400,8 @@ class FileIO:
                     raise Exception('[FATAL] Did not find backup file object.')
 
             raise IOError('Failed to write bytes to file.')
+
+        if isinstance(th, Thread):
+            th.join(0)
 
         return True

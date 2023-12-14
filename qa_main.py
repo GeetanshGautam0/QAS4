@@ -21,11 +21,11 @@ DEPENDENCIES
 
 """
 
-import sys
+import sys, click
 import tkinter as tk
 
 from tkinter import messagebox
-from typing import Any, Dict, Callable, Optional
+from typing import Any, Dict, Callable, Optional, Type
 from enum import Enum
 
 from qa_std import (
@@ -33,10 +33,9 @@ from qa_std import (
     Logger, LoggingLevel, LogDataPacket,
     qa_def, Diagnostics, ErrorManager, ThemeManager
 )
-from qa_file_io import file_io_manager
+from qa_file_io import file_io_manager, qa_file_std
 from qa_ui import RunAdminTools
 from qa_ui.qa_ui_def import UI_OBJECT
-
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('AppInitializer', 'qa_main.py')
 
@@ -123,6 +122,7 @@ class AppManager:
 
             messagebox.showerror('Quizzing App | App Instance Manager', 'FORCE QUIT command received.')
             self._ui.close()
+            self._tk_master.destroy()
             _terminate_app_()
 
             sys.exit(0)
@@ -142,7 +142,7 @@ class AppManager:
         self._tk_master.withdraw()
         self._tk_master.title('Quizzing App | App Instance Manager (AIM)')
 
-        self._ui = AppManager.RunAppFunctions[AppID.AdminTools](self, self._tk_master)
+        self._ui = AppManager.RunAppFunctions[self.app_id](self, self._tk_master)
 
         self._tk_master.protocol('WM_DELETE_WINDOW', self._on_app_close)
         self._ui.toplevel.protocol('WM_DELETE_WINDOW', self._on_app_close)
@@ -156,7 +156,18 @@ class AppManager:
         sys.stderr = sys.__stderr__
 
 
-def _terminate_app_() -> None:
+_ActiveApp: AppManager
+
+
+def _terminate_app_(**kwargs) -> None:
+    """
+
+    :keyword redirect_exception_hook: Redirect the exception hook to sys.__excepthook__
+
+    :param kwargs: Keyword arguments
+    :return: None
+    """
+
     # Remove the AppRun flag, if it exists
     NonvolatileFlags.NVF.remove_flag('AppRun', True)
 
@@ -165,7 +176,8 @@ def _terminate_app_() -> None:
     except Exception as E:
         ConsoleWriter.Write.error(f'IOHistManager.CT.CANCEL:', str(E))
 
-    sys.excepthook = sys.__excepthook__
+    if kwargs.get('redirect_exception_hook', True):
+        sys.excepthook = sys.__excepthook__
 
 
 def _check_for_tickets_() -> None:
@@ -189,12 +201,78 @@ def _check_for_tickets_() -> None:
                 pass
 
 
+@click.group()
+def CommandLineInterface() -> None:
+    pass
+
+
+StartAppIDs = ['quizzing_app', 'admin_tools', 'util']
+
+
+def raise_error_routine(exception: Type[BaseException], *error_args, quit_app: bool = True) -> None:
+    global _ActiveApp
+
+    if quit_app and '_ActiveApp' in dir():
+        assert isinstance(_ActiveApp, AppManager)
+
+        if isinstance(_ActiveApp._tk_master, tk.Tk):
+            _ActiveApp._ui.close()
+            _ActiveApp._tk_master.destroy()
+
+    _terminate_app_(redirect_exception_hook=False)
+
+    raise exception(*error_args)
+
+
+@CommandLineInterface.command()
+@click.argument('app_name')
+def start_app(**kwargs: Optional[None]) -> None:
+    global StartAppIDs
+
+    app: Optional[AppID] = None
+    app_name = kwargs.pop('app_name')
+
+    match app_name:
+        case 'quizzing_app':
+            app = AppID.QuizzingForm
+
+        case 'admin_tools':
+            app = AppID.AdminTools
+
+        case 'util':
+            app = AppID.Utilities
+
+        case '_RDQ':
+            sys.stdout.write('General app diagnostics complete. Run util to run all diagnostics.\n')
+
+            # Terminate app
+            _terminate_app_()
+            sys.exit(0)
+
+        case _:
+            raise_error_routine(Exception, 'Invalid/Unexpected app ID.')
+
+    assert isinstance(app, AppID)
+    _ActiveApp = AppManager(app, **kwargs)
+
+
 def _run_essential_diagnostics_() -> None:
     """
     RUN ESSENTIAL DIAGNOSTICS
 
     Essential diagnostics include:
     * F001:0000 (AC.locale)
+    * F001:0001 (AC.ConvertColor)
+    * F001:0002 (AC.File)
+    * F001:0004 (AC.DTC)
+    * F001:0005 (AC.DTC)
+    * F001:0006 (AC.DTC)
+    * F001:0007 (AC.DTC)
+    * F001:0008 (AC.DTC)
+    * F001:0009 (AC.DTC)
+    * F001:000A (AC.DTC)
+    * F001:000B (AC.DTC)
+    * F001:000C (AC.DTC)
 
     :return: None
     """
@@ -231,7 +309,7 @@ if __name__ == "__main__":
     # assert sys.excepthook == ErrorManager._O_exception_hook, 'Exception hook was not redirected.'
 
     # --------------------------------------------------------------------------------------------
-     
+
     # Check for tickets
     _check_for_tickets_()
     
@@ -242,9 +320,8 @@ if __name__ == "__main__":
     # Run essential diagnostics
     _run_essential_diagnostics_()
 
-    # TEST:
-    #   Run the "app"
-    AppManager(AppID.AdminTools)
+    # Run the command line interface
+    CommandLineInterface()
 
     # --------------------------------------------------------------------------------------------
 

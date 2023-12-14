@@ -81,9 +81,10 @@ SPEC:
 
 """
 
-DNA = (str, bytes, int, float, complex, bool)
-DA = (list, tuple, set, dict)
-CUSTOM = ()
+# Accepted data types
+DNA = (str, bytes, int, float, complex, bool)   # Def non-aggregate
+DA = (list, tuple, set, dict)                   # Def aggregate
+CUSTOM = ()                                     # Custom
 
 # Default aggregate
 

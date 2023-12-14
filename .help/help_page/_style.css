@@ -1,0 +1,109 @@
+:root {
+    --background: #202020;
+    --font_face: "Seoge UI", sans-serif;
+    --heading_font_face: "Seoge UI Black", sans-serif;
+    --accent: #3CC7F2;
+    --accent-d: #2BB6;
+    --foreground: #FFFFFF;
+    --gray: grey;
+
+    --h1_size: 200%;
+}
+
+body {
+    background: rgb(32, 32, 32);
+    color: var(--foreground);
+    font-family: var(--font_face);
+}
+
+.NON_TITLE_H1 {
+    color: var(--accent);
+    font-family: var(--heading_font_face);
+    font-size: var(--h1_size);
+}
+
+.TITLE_BOX {
+    width: 100%;
+    background-color: var(--accent);
+    color: var(--background);
+
+    text-align: center;
+    font-family: var(--heading_font_face);
+    font-size: var(--h1_size);
+
+    border-radius: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 10px 5px;
+}
+
+._gray {
+    color: var(--gray);
+}
+
+._ind {
+    padding-left: 5%;
+    /*color: var(--gray);*/
+}
+
+a {
+    color: var(--accent)
+}
+
+a:visited {
+    color: var(--accent-d)
+}
+
+._separate {
+    padding: 0.5%;
+}
+
+.ButtonWall{
+    padding: 0.5%
+}
+
+.linker_button {
+    display: inline-block;
+    border-radius: 10px;
+    background-color: var(--accent);
+    border: none;
+    color: var(--background);
+    text-align: center;
+    font-size: 100%;
+    padding: 20px;
+    width: fit-content;
+    transition: all 0.5s;
+    cursor: pointer;
+    margin: 5px;
+}
+
+.linker_button span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.5s;
+}
+
+.linker_button span:after {
+    content: '\00bb';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.5s;
+}
+
+.linker_button:hover {
+    opacity: 0.5;
+}
+
+.linker_button:hover span {
+    padding-right: 25px;
+    background-color: var(--accent-d);
+}
+
+.linker_button:hover span:after {
+    opacity: 1;
+    right: 0;
+}
+

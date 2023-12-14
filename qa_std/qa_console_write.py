@@ -36,6 +36,7 @@ DEPENDENCIES
 """
 
 import sys
+
 from typing import Any
 from . import qa_app_pol as AppPolicy, qa_def, qa_dtc
 from ctypes import windll

@@ -40,19 +40,18 @@ LOGGING LEVELS
 
 """
 
-from distutils.log import Log
+import os, datetime
+from typing import Callable, Any
+from enum import Enum
+from dataclasses import dataclass
+from threading import Thread
+
 import qa_file_io as FileIO
 from . import qa_app_pol as AppPolicy
 from . import qa_app_info as AppInfo
 from . import qa_console_write as ConsoleWriter
 from . import qa_def
 from . import qa_dtc
-
-import os, datetime
-from typing import Callable, Any
-from enum import Enum
-from dataclasses import dataclass
-from threading import Thread
 
 
 class LoggingLevel(Enum):

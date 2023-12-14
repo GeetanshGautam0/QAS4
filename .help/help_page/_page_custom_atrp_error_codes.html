@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" type="text/css" href="_style.css" />
+    <title>aTRP of Custom Errors</title>
+</head>
+<body>
+
+<div class="TITLE_BOX">
+
+    <h1>QUIZZING APP ERROR CLASSES</h1>
+
+</div>
+
+<div class="_gray">
+    <p>aTRP codes specify the specific class of error raised. Custom exceptions defined by the quizzing app also appear here.</p>
+</div>
+
+<a href="index.html">
+    <button class="linker_button"><span>Back to Main</span></button>
+</a>
+
+<h1 class="NON_TITLE_H1">Non-Default Exception Types</h1>
+
+<h2>NotYetImplemented Error</h2>
+<div class="aTRP_DESC _ind">
+
+    <ul>
+        <li>Defined in qa_std/qa_def.py</li>
+        <li>aTRP: <strong>0x6d155deb1f29ceb8857ef9e4017adf55</strong></li>
+
+    </ul>
+
+    <p>The requested feature has not been programmed into the application yet. If you are using:</p>
+        <ol>
+            <li>A <strong>BETA or ALPHA</strong> version of the app: This is not a bug; this is the result of the app being in its development phase and the feature will likely be programmed into the app in subsequent updates.</li>
+            <li>A <strong>STABLE RELEASE</strong> of the app: Report this as a bug.</li>
+        </ol>
+
+</div>
+
+<h2>BadFileFormat Error</h2>
+<div class="aTRP_DESC _ind">
+
+    <ul>
+        <li>Defined in qa_file_io/qa_file_std.py</li>
+        <li>aTRP: <strong>0x6d155deb1f29ceb8857ef9e4017adf55</strong></li>
+
+    </ul>
+
+    <p>The Quizzing Application FileIO manager tried to read from a file that was not of the expected format; the erroneous formatting may be part of the header and/or body sections of the file.</p>
+
+</div>
+
+<h2>FailureToComplyWithPolicy Error</h2>
+<div class="aTRP_DESC _ind">
+
+    <ul>
+        <li>Defined in qa_std/qa_def.py</li>
+        <li>aTRP: <strong>0x6d155deb1f29ceb8857ef9e4017adf55</strong></li>
+
+    </ul>
+
+    <p>The application did not comply with the policies put forth by the app developer. The policy violated is specified in the error string.<br>The following are the policies currently defined:</p>
+        <ul>
+            <li><strong><em>POLICY_MAX_IO_EVENTS_PER_MINUTE</em></strong> (default: 15 000 IO events per minute)</li>
+            <li><strong><em>POLICY_FIO_SW_COMPRESS_SRC_FILE</em></strong> (default: TRUE)</li>
+            <li><strong><em>POLICY_SW_GZIP_COMPRESSION_LEVEL</em></strong> (default: 7)</li>
+            <li><strong><em>POLICY_MAX_WHILE_LOOP_RETRIES</em></strong> (default: 100 000 retries)</li>
+            <li><strong><em>POLICY_FO_GEN_THEME_FILE_VERSION</em></strong> (default: version 1)</li>
+        </ul>
+
+</div>
+
+<h1 class="NON_TITLE_H1">Default Exception Types</h1>
+
+<h2>BaseException</h2>
+<div class="aTRP_DESC _ind" id="aTRP.BaseException">
+    <ul>
+        <li>aTRP: <strong>0x6d155deb1f29ceb8857ef9e4017adf55</strong></li>
+        <li>See <a href="_page_4c_error_codes.html#33FC">BaseException (0x33FC)</a> for information on this error.</li>
+    </ul>
+
+<h3>Other errors with this aTRP code:</h3>
+<div>
+    <ol>
+    <li>
+        Exception
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33F2">Exception (0x33F2)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        IOError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#3410">IOError (0x3410)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        AssertionError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33F3">AssertionError (0x33F3)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        BlockingIOError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">BlockingIOError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        BrokenPipeError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">BrokenPipeError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        BufferError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">BufferError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        EnvironmentError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">EnvironmentError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ChildProcessError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ChildProcessError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ConnectionAbortedError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ConnectionAbortedError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ConnectionError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ConnectionError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ConnectionRefusedError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ConnectionRefusedError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ConnectionResetError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ConnectionResetError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ImportError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ImportError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        IndentationError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">IndentationError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        IndexError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">IndexError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        KeyError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">KeyError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        InterruptedError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">InterruptedError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        LookupError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">LookupError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        MemoryError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FF">MemoryError (0x33FF)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ModuleNotFoundError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ModuleNotFoundError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        NotImplementedError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">NotImplementedError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        OSError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#3410">OSError (0x3410)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        Overflow Error
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">Overflow Error (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        PermissionError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33F4">PermissionError (0x33F4)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ProcessLookupError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ProcessLookupError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        RecursionError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33F6">RecursionError (0x33F6)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        ReferenceError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">ReferenceError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        RuntimeError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#3400">RuntimeError (0x3400)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        RuntimeWarning
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#3401">RuntimeWarning (0x3401)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        SyntaxError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#3403">SyntaxError (0x3403)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        SyntaxWarning
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#3402">SyntaxWarning (0x3402)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        TabError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">TabError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        TimeoutError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">TimeoutError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        UnboundLocalError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">UnboundLocalError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        SystemError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33F7">SystemError (0x33F7)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        UnicodeError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">UnicodeError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        UnicodeWarning
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">UnicodeWarning (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        UnicodeDecodeError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">UnicodeDecodeError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        UnicodeEncodeError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">UnicodeEncodeError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        UnicodeTranslateError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">UnicodeTranslateError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    <li>
+        WindowsError
+        <ul>
+            <li>See <a href="_page_4c_error_codes.html#33FC">WindowsError (0x33FC)</a> for information on this error.</li>
+        </ul>
+    </li>
+
+    </ol>
+</div>
+</div>
+
+<h2>ValueError</h2>
+<div class="aTRP_DESC _ind" id="aTRP.ValueError">
+    <ul>
+        <li>aTRP: <strong>0x2314cbbc24c84a2b0b04ea14d0dcf61d</strong></li>
+        <li>See <a href="_page_4c_error_codes.html#244D">ValueError (0x244D)</a> for information on this error.</li>
+    </ul>
+
+    <h3>Other errors with this aTRP code:</h3>
+    <div>
+
+        <ol>
+
+            <li>
+                AttributeError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#23F3">AttributeError (0x23F3)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+            <li>
+                NameError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#23F4">NamError (0x23F4)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+            <li>
+                TypeError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#23EA">TypeError (0x23EA)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+        </ol>
+
+    </div>
+
+</div>
+
+<h2>ArithmeticError</h2>
+<div class="aTRP_DESC _ind" id="aTRP.ArithmeticError">
+    <ul>
+        <li>aTRP: <strong>0x55e36704e1a289c70b89871457be4356</strong></li>
+        <li>See <a href="_page_4c_error_codes.html#244D">ValueError (0x244D)</a> for information on this error.</li>
+    </ul>
+
+    <h3>Other errors with this aTRP code:</h3>
+    <div>
+
+        <ol>
+
+            <li>
+                ZeroDivisionError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#44BD">ZeroDivisionError (0x44BD)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+            <li>
+                FloatingPointError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#43F3">FloatingPointError (0x43F3)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+        </ol>
+
+    </div>
+
+</div>
+
+
+<h2>EOFError</h2>
+<div class="aTRP_DESC _ind" id="aTRP.EOFError">
+    <ul>
+        <li>aTRP: <strong>0xa44a51ea8124b862cea61ca3616c37ce</strong></li>
+        <li>See <a href="_page_4c_error_codes.html#13EC">EOFError (0x13EC)</a> for information on this error.</li>
+    </ul>
+
+    <h3>Other errors with this aTRP code:</h3>
+    <div>
+
+        <ol>
+
+            <li>
+                NotADirectoryError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#13F6">NotADirectoryError (0x13F6)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+            <li>
+                IsADirectoryError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#1400">IsADirectoryError (0x1400)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+            <li>
+                FileNotFoundError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#141E">FileNotFoundError (0x141E)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+            <li>
+                FileExistsError
+                <ul>
+                    <li>See <a href="_page_4c_error_codes.html#15E0">FileExistsError (0x15E0)</a> for information on this error.</li>
+                </ul>
+            </li>
+
+        </ol>
+
+    </div>
+
+</div>
+
+
+</body>
+</html>

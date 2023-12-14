@@ -88,7 +88,7 @@ class File:
         return "\\".join(i for i in tokens[:-1:]), tokens[-1]
 
 
-class NotYetImplemented(Exception):
+class NotYetImplemented(NotImplementedError):
     def __init__(self, feature: str) -> None:
         self.f = feature
         
