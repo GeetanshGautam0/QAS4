@@ -28,10 +28,11 @@ from tkinter import messagebox
 from typing import Any, Dict, Callable, Optional, Type
 from enum import Enum
 
+import qa_std.qa_diagnostics as Diagnostics
 from qa_std import (
     AppPolicy, NonvolatileFlags, ConsoleWriter,
     Logger, LoggingLevel, LogDataPacket,
-    qa_def, Diagnostics, ErrorManager, ThemeManager
+    qa_def, ErrorManager, ThemeManager
 )
 from qa_file_io import file_io_manager, ThemeFile
 from qa_ui import RunAdminTools
@@ -275,7 +276,34 @@ def _run_essential_diagnostics_() -> None:
     * F001:000A (AC.DTC)
     * F001:000B (AC.DTC)
     * F001:000C (AC.DTC)
-    * F001:000D (AC.File.SOURCE_FILES)
+    * F001:000D (AC.DTC)
+    * F001:000E (AC.DTC)
+    * F001:000F (AC.DTC)
+    * F001:0010 (AC.DTC)
+    * F001:0011 (AC.DTC)
+    * F001:0012 (AC.DTC)
+    * F001:0013 (AC.DTC)
+    * F001:0014 (AC.DTC)
+    * F001:0015 (AC.DTC)
+    * F001:0016 (AC.DTC)
+    * F001:0017 (AC.DTC)
+    * F001:0018 (AC.DTC)
+    * F001:0019 (AC.DTC)
+    * F001:001A (AC.DTC)
+    * F001:001B (AC.DTC)
+    * F001:001C (AC.DTC)
+    * F001:001D (AC.DTC)
+    * F001:001E (AC.DTC)
+    * F001:001F (AC.DTC)
+    * F001:0020 (AC.DTC)
+    * F001:0021 (AC.DTC)
+    * F001:0022 (AC.DTC)
+    * F001:0023 (AC.DTC)
+    * F001:0024 (AC.DTC)
+    * F001:0025 (AC.DTC)
+    * F001:0026 (AC.DTC)
+    * F001:0027 (AC.DTC)
+    * F001:0028 (AC.File.SOURCE_FILES)
 
     :return: None
     """
@@ -306,6 +334,10 @@ if __name__ == "__main__":
     #   (contingent on whether the error is fatal)
     ErrorManager.Minf_EH_Md7182_eHookTasks.append(
         (lambda is_fatal: is_fatal, file_io_manager.iohm.current_task.cancel)
+    )
+
+    ErrorManager.Minf_EH_Md7182_eHookTasks.append(
+        (lambda is_fatal: is_fatal, lambda: AppLogger.thread.join(AppLogger, 0))
     )
 
     # Check if the script is allowed to run as main (it has to be)

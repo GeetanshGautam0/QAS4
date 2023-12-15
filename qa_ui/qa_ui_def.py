@@ -30,6 +30,9 @@ class UI_OBJECT(Thread):
 
         self.start()
 
+    def __del__(self) -> None:
+        self.join(0)
+
     @property
     def toplevel(self) -> tk.Toplevel:
         raise NotImplementedError('Property _toplevel_ not yet defined.')
@@ -89,12 +92,23 @@ class UI_OBJECT(Thread):
                 arg = {
                     'PAD_X': self.pad_x,
                     'PAD_Y': self.pad_y,
-                    'SCR_W': self.toplevel.winfo_screenwidth(),
-                    'SCR_H': self.toplevel.winfo_screenheight(),
-                    'WND_W': self.toplevel.winfo_width(),
-                    'WND_H': self.toplevel.winfo_height(),
                     'ELMNT': element,
                 }.get(arg, arg)
+
+                try:
+                    narg = {
+                        'SCR_W': self.toplevel.winfo_screenwidth(),
+                        'SCR_H': self.toplevel.winfo_screenheight(),
+                        'WND_W': self.toplevel.winfo_width(),
+                        'WND_H': self.toplevel.winfo_height(),
+                    }.get(arg, arg)
+
+                except NotImplementedError:
+                    pass
+
+                else:
+                    arg = narg
+                    del narg
 
             output.append(arg)
 

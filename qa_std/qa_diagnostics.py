@@ -22,11 +22,15 @@ from . import locale as M_locale
 from . import qa_def as M_qa_def
 from . import qa_dtc as M_qa_dtc
 from . import qa_app_info as M_qa_app_info
+from . import qa_theme as M_qa_theme
 
 from . import qa_logger as Logger
 from . import qa_app_pol as AppPolicy
 
+from qa_ui import qa_ui_def as M_qa_ui_def
+
 from typing import Callable, Any, Type
+from tkinter import Label
 
 
 _global_logger: Logger.Logger
@@ -263,11 +267,142 @@ class ModDiagnostics:
             ModDiagnostics._qa_dtc_sr1_('0xF001:0x000C', exp_dict, from_dict, 'dict --> bytes')
         )
 
+    # QA DTC Module (--> STR)
+    #   BYTES   --> STR                         0xF001:0x000D
+    #   INT     --> STR                         0xF001:0x000E
+    #   FLOAT   --> STR                         0xF001:0x000F
+    #   LIST    --> STR                         0xF001:0x0010
+    #   TUPLE   --> STR                         0xF001:0x0011
+    #   COMPLEX --> STR                         0xF001:0x0012
+    #   BOOL    --> STR                         0xF001:0x0013
+    #   SET     --> STR                         0xF001:0x0014
+    #   DICT    --> STR                         0xF001:0x0015
+    @staticmethod
+    def _qa_dtc_to_str() -> bool:
+        from_str = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_int = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_int, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_float = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_float, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_list = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_list, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_tuple = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_tuple, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_complex = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_complex, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_bool = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_bool, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_set = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_set, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_dict = M_qa_dtc.convert(str, ModDiagnostics._qa_dtc_test_dict, cfa=ModDiagnostics._qa_dtc_test_cfa)
+
+        exp_str = '`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?'
+        exp_int = '234782384723'
+        exp_float = '123123.123124'
+        exp_list = '[Hello, World!;[`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?];{`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?};(123123.123124;234782384723);{234782384723-123123.123124:(12.0+56.0j)-True}]'
+        exp_tuple = '(Hello, World!;[`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?];{`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?};(123123.123124;234782384723);{234782384723-123123.123124:(12.0+56.0j)-True})'
+        exp_complex = '(12.0+56.0j)'
+        exp_bool = 'True'
+        exp_set = '{12930;15;1293;1831}'
+        exp_dict = '{Hello, World!-[Hello, World!;[`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?];{`1234567890-=~!@#$%^&*()_+QWERTYUIOP{}|qwertyuiop[]asdfghjkl;ASDFGHJKL:"zxcvbnm,./ZXCVBNM<>?};(123123.123124;234782384723);{234782384723-123123.123124:(12.0+56.0j)-True}]}'
+
+        return (
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x000D', exp_str, from_str, 'bytes --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x000E', exp_int, from_int, 'int --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x000F', exp_float, from_float, 'float --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0010', exp_list, from_list, 'list --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0011', exp_tuple, from_tuple, 'tuple --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0012', exp_complex, from_complex, 'complex --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0013', exp_bool, from_bool, 'bool --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0014', exp_set, from_set, 'set --> str') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0015', exp_dict, from_dict, 'dict --> str')
+        )
+
+    # QA DTC Module (--> INT)
+    #   BYTES   --> INT                         0xF001:0x0016
+    #   INT     --> INT                         0xF001:0x0017
+    #   FLOAT   --> INT                         0xF001:0x0018
+    #   LIST    --> INT                         0xF001:0x0019
+    #   TUPLE   --> INT                         0xF001:0x001A
+    #   COMPLEX --> INT                         0xF001:0x001B
+    #   BOOL    --> INT                         0xF001:0x001C
+    #   SET     --> INT                         0xF001:0x001D
+    #   DICT    --> INT                         0xF001:0x001E
+    @staticmethod
+    def _qa_dtc_to_int() -> bool:
+        _raises(ValueError, M_qa_dtc.convert, int, ModDiagnostics._qa_dtc_test_str, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        _raises(ValueError, M_qa_dtc.convert, int, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_float = M_qa_dtc.convert(int, ModDiagnostics._qa_dtc_test_float, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_list = M_qa_dtc.convert(int, [7392639, 33, 3984.484], cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_tuple = M_qa_dtc.convert(int, (7392639, 33, 3984.484), cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_complex = M_qa_dtc.convert(int, ModDiagnostics._qa_dtc_test_complex, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_bool = M_qa_dtc.convert(int, ModDiagnostics._qa_dtc_test_bool, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_set = M_qa_dtc.convert(int, {7392639, 33, 3984.484}, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_dict = M_qa_dtc.convert(int, {73: 8393, 84: 829, 9082: 84903}, cfa=ModDiagnostics._qa_dtc_test_cfa)
+
+        exp_float = 123123
+        exp_list = 3
+        exp_tuple = 3
+        exp_complex = 12
+        exp_bool = 1
+        exp_set = 3
+        exp_dict = 3
+
+        return (
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0018', exp_float, from_float, 'float --> int') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0019', exp_list, from_list, 'list --> int') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x001A', exp_tuple, from_tuple, 'tuple --> int') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x001B', exp_complex, from_complex, 'complex --> int') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x001C', exp_bool, from_bool, 'bool --> int') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x001D', exp_set, from_set, 'set --> int') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x001E', exp_dict, from_dict, 'dict --> int')
+        )
+
+    # QA DTC Module (--> FLOAT)
+    #   STR     --> FLOAT                         0xF001:0x001F
+    #   BYTES   --> FLOAT                         0xF001:0x0020
+    #   INT     --> FLOAT                         0xF001:0x0021
+    #   LIST    --> FLOAT                         0xF001:0x0022
+    #   TUPLE   --> FLOAT                         0xF001:0x0023
+    #   COMPLEX --> FLOAT                         0xF001:0x0024
+    #   BOOL    --> FLOAT                         0xF001:0x0025
+    #   SET     --> FLOAT                         0xF001:0x0026
+    #   DICT    --> FLOAT                         0xF001:0x0027
+    @staticmethod
+    def _qa_dtc_to_float() -> bool:
+        _raises(ValueError, M_qa_dtc.convert, float, ModDiagnostics._qa_dtc_test_str, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        _raises(ValueError, M_qa_dtc.convert, float, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_int = M_qa_dtc.convert(float, 123123, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_list = M_qa_dtc.convert(float, [7392639, 33, 3984.484], cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_tuple = M_qa_dtc.convert(float, (7392639, 33, 3984.484), cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_complex = M_qa_dtc.convert(float, ModDiagnostics._qa_dtc_test_complex, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_bool = M_qa_dtc.convert(float, ModDiagnostics._qa_dtc_test_bool, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_set = M_qa_dtc.convert(float, {7392639, 33, 3984.484}, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        from_dict = M_qa_dtc.convert(float, {73: 8393, 84: 829, 9082: 84903}, cfa=ModDiagnostics._qa_dtc_test_cfa)
+
+        exp_int = 123123.0
+        exp_list = 3.0
+        exp_tuple = 3.0
+        exp_complex = 12.0
+        exp_bool = 1.0
+        exp_set = 3.0
+        exp_dict = 3.0
+
+        return (
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0021', exp_int, from_int, 'int --> float') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0022', exp_list, from_list, 'list --> float') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0023', exp_tuple, from_tuple, 'tuple --> float') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0024', exp_complex, from_complex, 'complex --> float') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0025', exp_bool, from_bool, 'bool --> float') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0026', exp_set, from_set, 'set --> float') &
+                ModDiagnostics._qa_dtc_sr1_('0xF001:0x0027', exp_dict, from_dict, 'dict --> float')
+        )
+
+
+
     @staticmethod
     def qa_dtc() -> bool:
-        return ModDiagnostics._qa_dtc_to_bytes()
+        return (
+                ModDiagnostics._qa_dtc_to_bytes()   &
+                ModDiagnostics._qa_dtc_to_str()     &
+                ModDiagnostics._qa_dtc_to_int()     &
+                ModDiagnostics._qa_dtc_to_float()
+        )
 
-    # Test 0xF001:0x000D
+    # Test 0xF001:0x0028
     #       Check if all source files are present
 
     @staticmethod
@@ -279,7 +414,7 @@ class ModDiagnostics:
                 Logger.LogDataPacket(
                     'Diagnostics',
                     Logger.LoggingLevel.L_SUCCESS,
-                    'DIAG <0xF001:0x000D> "A.FILE:SRC_FILES" PASS'
+                    'DIAG <0xF001:0x0028> "A.FILE:SRC_FILES" PASS'
                 )
             )
             return True
@@ -299,8 +434,68 @@ class GeneralDiagnostics:
 
 
 class AppDiagnostics:
-    pass
+    # Test the UI_OBJECT update_ui function
+    # QA UI_OBJECT Diagnostics
+    #   update_ui and components                    0xF003:0x0000
 
+    @staticmethod
+    def test_ui_updates() -> bool:
+        global _global_logger
+
+        out = True
+        ui = M_qa_ui_def.UI_OBJECT()
+
+        try:
+            lbl = Label()
+            M_qa_theme.ThemeInfo.load_all_data()
+            ui.pad_x = 1083
+            ui.pad_y = 3
+            ui.update_requests.append(
+                [
+                    lbl,
+                    [M_qa_def.UpdateCommand.BACKGROUND, [M_qa_def.UpdateVariables.BACKGROUND]],
+                    [M_qa_def.UpdateCommand.FOREGROUND, [M_qa_def.UpdateVariables.FOREGROUND]],
+                    [M_qa_def.UpdateCommand.FONT, (M_qa_def.UpdateVariables.TITLE_FONT_FACE, M_qa_def.UpdateVariables.SMALL_FONT_SIZE)],
+                    [
+                        M_qa_def.UpdateCommand.CUSTOM,
+                        [
+                            lambda e, t: e.config(text=t),
+                            'ELMNT',
+                            (
+                                M_qa_def.UpdateCommand.CUSTOM,
+                                lambda px, py: px / py,
+                                (
+                                    M_qa_def.UpdateCommand.CUSTOM,
+                                    lambda x: x,
+                                    'PAD_X'
+                                ),
+                                'PAD_Y'
+                            )
+                        ]
+                    ]
+                ]
+            )
+
+            ui.update_ui()
+            t = M_qa_theme.ThemeInfo.preferred_theme
+
+            assert lbl.cget('text') == '361.0', 'Update UI failed'
+            assert lbl.cget('bg') == t.background.color, 'Update UI failed'
+            assert lbl.cget('fg') == t.foreground.color, 'Update UI failed'
+            assert lbl.cget('font') == (t.title_font_face, t.font_size_small), 'Update UI failed'
+
+        except Exception as E:
+            _global_logger.write(
+                Logger.LogDataPacket(
+                    'Diagnostics',
+                    Logger.LoggingLevel.L_ERROR,
+                    f'DIAG <0xF003:0x0000> "APP.UI.UPDATE_UI" FAIL: {E}'
+                )
+            )
+            out = False
+
+        del ui  # Calls UI_OBJECT.
+        return out
 
 if __name__ == "__main__":
     ModulePolicy.run_as_main()

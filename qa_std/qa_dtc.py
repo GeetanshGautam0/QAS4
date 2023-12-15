@@ -380,7 +380,7 @@ class FLOAT(ConvertToDefaultType):
         match self.cfa.aggregate_to_numerical_conversion:
             case 0:
                 # Length
-                return len(d)
+                return len(data)
 
             case 1:
                 return sum([convert(int, e, cfa=self.cfa) for e in data])
