@@ -20,7 +20,7 @@ DEPENDENCIES
 """
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, Tk
 from typing import Optional, cast, Union, List
 from enum import Enum
 
@@ -43,7 +43,10 @@ class FrameID(Enum):
 class _UI(UI_OBJECT):
     def __init__(self, AI: object, master: tk.Tk) -> None:
         self._master: tk.Tk = master
-        self._top_level = tk.Toplevel(self._master)
+        self._top_level = tk.Toplevel(master)
+
+        self.toplevel.withdraw()
+
         self._ai = AI
 
         self.screen_size = (self._master.winfo_screenwidth(), self._master.winfo_screenheight())
@@ -85,18 +88,14 @@ class _UI(UI_OBJECT):
 
         super(_UI, self).__init__()
 
-    def __del__(self) -> None:
-        self.join(0)
-
     @property
-    def toplevel(self) -> tk.Toplevel:
+    def toplevel(self) -> tk.Toplevel | Tk:
         return self._top_level
 
     def close(self) -> bool:
-        self._master.after(0, self._master.quit)
-        self._top_level.after(0, self._top_level.quit)
+        self._master.after(0, self._master.destroy)
+        self._top_level.after(0, self._top_level.destroy)
 
-        self.join(0)
         return True
 
     @staticmethod
@@ -105,6 +104,8 @@ class _UI(UI_OBJECT):
         _admin_tools_logger.write(ldp)
 
     def run(self) -> None:
+        global _admin_tools_logger
+
         self.toplevel.geometry('%dx%d+%d+%d' % (
             self.window_size[0], self.window_size[1], self.window_pos[0], self.window_pos[1]
         ))
@@ -115,6 +116,9 @@ class _UI(UI_OBJECT):
         # Setup padding
         self.pad_x = 20 if 20 < self.window_size[0] / 20 else 0  # PadX = 20 if 20 < 5% of the window width, else 0
         self.pad_y = 10 if 10 < self.window_size[1] / 20 else 0  # PadX = 10 if 10 < 5% of the window height, else 0
+
+        # Set VLE_ENABLED
+        self.VLE_ENABLED = not _admin_tools_logger.DISABLE_VLE
 
         # Create update requests
         self._crt_updt_req_frame(self._top_level)  # Create an update req for _top_level
@@ -176,7 +180,7 @@ class _UI(UI_OBJECT):
                      [
                          lambda e, w, px: e.config(wraplength=(w-2*px)),
                         'ELMNT', 'WND_W', 'PAD_X'
-                     ]
+                     ],
                 ]
              ]
         )
@@ -228,48 +232,15 @@ class _UI(UI_OBJECT):
                         STD.LogDataPacket('AdminToolsUI', STD.LoggingLevel.L_ERROR, f'Failed to disable input {inp}')
                     )
 
-    # Functions to create update requests
-    # The syntax for adding an update request:
-    #
-    #       [... [ELEMENT, [COMMAND, [ARGS]], ...]]
-
-    def _crt_updt_req_frame(
-            self,
-            frame: tk.Toplevel | tk.Frame
-    ) -> None:
-        self.update_requests.append(
-            [
-                cast(tk.Widget, frame),
-                [uC.BACKGROUND, [uV.BACKGROUND]]
-            ]
-        )
-
-    def _crt_updt_req_label(
-            self,
-            label: tk.Label | tk.LabelFrame,
-            bg: str | uV = uV.BACKGROUND,
-            fg: str | uV = uV.FOREGROUND,
-            font_size: int | uV = uV.NORML_FONT_SIZE,
-            font_face: str | uV = uV.FONT_FACE,
-    ) -> None:
-        self.update_requests.append(
-            [
-                label,
-                [uC.BACKGROUND, [bg]],
-                [uC.FOREGROUND, [fg]],
-                [uC.FONT, (font_face, font_size)],
-            ]
-        )
-
 
 ModuleScript = STD.AppPolicy.PolicyManager.Module('AdminTools', 'qa_admin_tools.py')
 
 
-def RunApp(AppInstance: object, master: tk.Tk, logger: STD.Logger) -> _UI:
+def RunApp(app_instance: object, master: tk.Tk, logger: STD.Logger) -> _UI:
     global _admin_tools_logger
 
     _admin_tools_logger = logger
-    return _UI(AppInstance, master)
+    return _UI(app_instance, master)
 
 
 if __name__ == "__main__":

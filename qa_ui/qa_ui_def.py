@@ -16,10 +16,11 @@ from qa_std import (
 )
 
 
-class UI_OBJECT(Thread):
+class UI_OBJECT:
     def __init__(self) -> None:
         super(UI_OBJECT, self).__init__()
 
+        self.VLE_ENABLED = True
         self.update_requests: List[List[tk.Widget, Tuple[UC, List[Any, ...]]]] = []
         self.post_update_req: List[List[tk.Widget, Tuple[UC, List[Any, ...]]]] = []
 
@@ -28,13 +29,13 @@ class UI_OBJECT(Thread):
         self.pad_x: Optional[int] = None
         self.pad_y: Optional[int] = None
 
-        self.start()
+        self.run()
 
-    def __del__(self) -> None:
-        self.join(0)
+    def run(self) -> None:
+        raise NotImplementedError
 
     @property
-    def toplevel(self) -> tk.Toplevel:
+    def toplevel(self) -> tk.Toplevel | tk.Tk:
         raise NotImplementedError('Property _toplevel_ not yet defined.')
 
     @property
@@ -50,7 +51,7 @@ class UI_OBJECT(Thread):
 
     @staticmethod
     def log(_: LogDataPacket) -> None:
-        return  # Add a log command here once the logger instance is available
+        return  # Add a log command here in the subclass when the logger instance is available
 
     def _ureq_manage_args(self, element: tk.Widget, args: List[Any] | Tuple[Any] | Set[Any] | SupportsIndex) -> List[Any]:
         output = []
@@ -115,6 +116,8 @@ class UI_OBJECT(Thread):
         return output
 
     def apply_update_reqs(self, reqs: List[Any]) -> None:
+        self.toplevel.update()
+
         for entry in reqs:
             _el, *requests = entry
             element = cast(tk.Label | tk.Widget, _el)
@@ -155,8 +158,8 @@ class UI_OBJECT(Thread):
                             assert len(args) == 1
 
                             element.config(
-                                highlightcolor=args[0].color,
-                                highlightbackground=args[0].color
+                                highlightcolor=args[0],
+                                highlightbackground=args[0]
                             )
 
                         case UC.BORDER_WIDTH:
@@ -169,11 +172,27 @@ class UI_OBJECT(Thread):
                                 bd=args[0],
                             )
 
+                        case UC.ACTIVE_BACKGROUND:
+                            assert len(args) == 1
+
+                            element.config(activebackground=args[0])
+
+                        case UC.ACTIVE_FOREGROUND:
+                            assert len(args) == 1
+
+                            element.config(activeforeground=args[0])
+
+                        case UC.WRAP_LENGTH:
+                            assert len(args) == 1
+                            assert isinstance(args[0], (float, int))
+
+                            element.config(wraplength=args[0])
+
                         case _:
                             raise NotImplementedError('Update command.')
 
                 except Exception as E:
-                    if AppInfo.ConfigurationFile.config.VLE:  # Verbose logging enabled
+                    if AppInfo.ConfigurationFile.config.VLE & self.VLE_ENABLED:  # Verbose logging enabled
                         self.log(LogDataPacket(
                             'UIObject',
                             LoggingLevel.L_ERROR,
@@ -188,14 +207,14 @@ class UI_OBJECT(Thread):
                         ))
 
                 else:
-                    if AppInfo.ConfigurationFile.config.VLE:  # Verbose logging enabled
+                    if AppInfo.ConfigurationFile.config.VLE & self.VLE_ENABLED:  # Verbose logging enabled
                         self.log(LogDataPacket(
                             'UIObject',
                             LoggingLevel.L_GENERAL,
                             f'[VERBOSE LOGGING ENABLED] Applied command {command} to {element}'
                         ))
 
-    def _update_ui_plugin(self, *_, **_0) -> None:
+    def _update_ui_plugin(self, *_, **__) -> None:
         return  # Add your own code here.
 
     def update_ui(self) -> None:
@@ -206,3 +225,36 @@ class UI_OBJECT(Thread):
         self._update_ui_plugin()
 
         self.apply_update_reqs(self.post_update_req)
+
+        # Functions to create update requests
+        # The syntax for adding an update request:
+        #
+        #       [... [ELEMENT, [COMMAND, [ARGS]], ...]]
+
+    def _crt_updt_req_frame(
+            self,
+            frame: tk.Tk | tk.Toplevel | tk.Frame
+    ) -> None:
+        self.update_requests.append(
+            [
+                cast(tk.Widget, frame),
+                [UC.BACKGROUND, [UV.BACKGROUND]]
+            ]
+        )
+
+    def _crt_updt_req_label(
+            self,
+            label: tk.Label | tk.LabelFrame,
+            bg: str | UV = UV.BACKGROUND,
+            fg: str | UV = UV.FOREGROUND,
+            font_size: int | UV = UV.NORML_FONT_SIZE,
+            font_face: str | UV = UV.FONT_FACE,
+    ) -> None:
+        self.update_requests.append(
+            [
+                label,
+                [UC.BACKGROUND, [bg]],
+                [UC.FOREGROUND, [fg]],
+                [UC.FONT, (font_face, font_size)],
+            ]
+        )

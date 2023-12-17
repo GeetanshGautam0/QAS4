@@ -27,6 +27,7 @@ import tkinter as tk
 from tkinter import messagebox
 from typing import Any, Dict, Callable, Optional, Type
 from enum import Enum
+from time import sleep
 
 import qa_std.qa_diagnostics as Diagnostics
 from qa_std import (
@@ -34,8 +35,8 @@ from qa_std import (
     Logger, LoggingLevel, LogDataPacket,
     qa_def, ErrorManager, ThemeManager
 )
-from qa_file_io import file_io_manager, ThemeFile
-from qa_ui import RunAdminTools
+from qa_file_io import file_io_manager
+from qa_ui import RunAdminTools, CreateSplashScreen
 from qa_ui.qa_ui_def import UI_OBJECT
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('AppInitializer', 'qa_main.py')
@@ -73,10 +74,17 @@ class AppManager:
         self.app_id = app_id
         self._ar, self._kw = args, kwargs
         self._tk_master: Optional[tk.Tk] = None
+        self._tu_id = None
 
         self._ui: Optional[UI_OBJECT] = None
         self._quit_signals = 0
         self._task_2739 = None
+
+        self.boot_steps = [
+            'Running Diagnostics',
+            'Initializing User Interface',
+            'Boot Sequence Complete'
+        ]
 
         assert app_id in AppID.__members__.values(), '0x0001:0x0000'
 
@@ -135,6 +143,12 @@ class AppManager:
                 'App not ready to close. QUIT 3 times in 15 seconds to FORCE QUIT.'
             ))
 
+    def temp_update(self) -> None:
+        self._tk_master.update()
+        self.splash_screen.toplevel.update()
+
+        self._tu_id = self.splash_screen.toplevel.after(100, self.temp_update)
+
     def run(self) -> None:
         global AppLogger
 
@@ -143,15 +157,49 @@ class AppManager:
 
         self._tk_master = tk.Tk()
         self._tk_master.withdraw()
-        self._tk_master.title('Quizzing App | App Instance Manager (AIM)')
+
+        self._tk_master.title('QA4 | App Instance Manager (AIM)')
+
+        self.splash_screen = CreateSplashScreen(self, self._tk_master, AppLogger, _terminate_app_, self.boot_steps)
+        self.temp_update()
+
+        self.splash_screen.set_app_name(
+            {
+                AppID.AdminTools: 'Administrator Tools',
+                AppID.Utilities: 'Utilities',
+                AppID.QuizzingForm: 'Quizzing Form'
+            }[self.app_id]
+        )
+
+        # Run diagnostics
+
+        self.splash_screen.increment_progress()
+
+        _run_essential_diagnostics_()
+
+        # Launch the app UI.
+
+        self.splash_screen.increment_progress()
 
         self._ui = AppManager.RunAppFunctions[self.app_id](self, self._tk_master, AppLogger)
+
+        # Boot sequence complete
+
+        self.splash_screen.increment_progress()
+
+        assert self.splash_screen.complete_boot
+
+        self.splash_screen.toplevel.after_cancel(self._tu_id)
+        self.splash_screen.toplevel.destroy()
 
         self._tk_master.protocol('WM_DELETE_WINDOW', self._on_app_close)
         self._ui.toplevel.protocol('WM_DELETE_WINDOW', self._on_app_close)
 
+        self._ui.toplevel.wm_deiconify()
+        self._ui.toplevel.overrideredirect(False)
+        self._ui.toplevel.focus_get()
+
         self._ui.toplevel.mainloop()
-        self._tk_master.mainloop()
 
     def __del__(self) -> None:
         sys.excepthook = sys.__excepthook__
@@ -229,8 +277,9 @@ def raise_error_routine(exception: Type[BaseException], *error_args, quit_app: b
 
 @CommandLineInterface.command()
 @click.argument('app_name')
+@click.option('--disable_VLE', is_flag=True)
 def start_app(**kwargs: Optional[None]) -> None:
-    global StartAppIDs
+    global StartAppIDs, AppLogger
 
     app: Optional[AppID] = None
     app_name = kwargs.pop('app_name')
@@ -254,6 +303,8 @@ def start_app(**kwargs: Optional[None]) -> None:
 
         case _:
             raise_error_routine(Exception, 'Invalid/Unexpected app ID.')
+
+    AppLogger.DISABLE_VLE = kwargs.get('disable_vle', False)
 
     assert isinstance(app, AppID)
     _ActiveApp = AppManager(app, **kwargs)
@@ -351,12 +402,8 @@ if __name__ == "__main__":
 
     # Load the theme data
     ThemeManager._global_logger = AppLogger
-    ThemeManager.ThemeInfo.load_all_data()
 
-    # Run essential diagnostics
-    _run_essential_diagnostics_()
-
-    # Run the command line interface
+    # Run the command line interface --> Run the app.
     CommandLineInterface()
 
     # --------------------------------------------------------------------------------------------

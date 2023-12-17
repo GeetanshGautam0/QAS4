@@ -78,6 +78,8 @@ class Logger(Thread):
     def __init__(self) -> None:
         self.thread = Thread
         self.thread.__init__(self, name="LoggerThread")
+
+        self.DISABLE_VLE = False
         
         # Define the following symbols but do not initialize them. 
         self._lfile: qa_def.File

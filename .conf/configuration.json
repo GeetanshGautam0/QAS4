@@ -4,7 +4,7 @@
     "AUTH": ["Geetansh Gautam", "geetansh.ca"],
     "AVS":  "4.0.0.1",
     "BT":   0,
-    "BI":   ""
+    "BI":   "A0.0.1"
   },
   "settings": {
     "locale": [0, "en-US"],

@@ -64,6 +64,7 @@ def stderr(*data: Any, delim: str = ' ', line_termination: str = '\n') -> None:
 
 
 def stdout(*data: Any, delim: str = ' ', line_termination: str = '\n') -> None:
+    if not AppPolicy.POLICY_CWRT_ENABLE_STDOUT: return
     sys.stdout.write(delim.join(data) + line_termination)
 
 

@@ -37,7 +37,7 @@ class FailureToComplyWithPolicy(Exception):
 #   Specifies the maximum number of IO events that can be allowed in any given one-minute period
 #   Failure to comply with this policy should result in the invocation of a IOError exception
 #
-# Default: 1000
+# Default: 15_000
 #
 POLICY_MAX_IO_EVENTS_PER_MINUTE = 15_000
 #
@@ -61,7 +61,7 @@ POLICY_SW_GZIP_COMPRESSION_LEVEL = 7
 # POLICY_MAX_WHILE_LOOP_RETRIES
 #   Specifies the maximum number of times that a loop can be run (specifically a while loop).
 #
-# Default: 10_000
+# Default: 100_000
 #
 POLICY_MAX_WHILE_LOOP_RETRIES = 100_000
 #
@@ -72,6 +72,14 @@ POLICY_MAX_WHILE_LOOP_RETRIES = 100_000
 #
 POLICY_FO_GEN_THEME_FILE_VERSION = 1
 #
+#
+# POLICY_CWRT_ENABLE_STDOUT
+#   Specifies whether the ConsoleWriter.STDOUT function is allowed to print messages to console.
+#
+#   NOTE: IF SET TO FALSE, LOG MESSAGES WILL NOT APPEAR IN CONSOLE BUT WILL STILL BE SAVED TO THE LOG FILE.
+#
+# Default: True
+POLICY_CWRT_ENABLE_STDOUT = True
 # ----------------------- Section Complete -----------------------
 
 

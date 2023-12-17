@@ -33,6 +33,12 @@ _In `.conf\configuration.json`_:
 }
 ```
 
+Alternatively, _if the above is set to `true`_, VL can temporarily be disabled by adding the flag `--disable_VLE` to the command.
+
+```shell
+python qa_main.py [COMMAND] --disable_VLE
+```
+
 ## Other App Settings (Only Configurable in Development)
 ```python
 # qa_std/qa_app_pol.py

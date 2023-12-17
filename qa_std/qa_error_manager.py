@@ -33,6 +33,7 @@ from .qa_def import ANSI, ExceptionCodes, File
 from .qa_console_write import Write as ConsoleWriter, stderr
 from typing import Optional, Any, overload, Union, cast, Type, List, Tuple
 from dataclasses import dataclass
+import qa_msg_box as msg
 
 from . import qa_logger as Logger
 
@@ -462,6 +463,14 @@ def InvokeException(exception: ExceptionObject, *exception_arguments, offset=0, 
                 
             else:
                 ConsoleWriter.error(ei.formatted_string)
+
+            msg.show_message(
+                msg.Message(
+                    msg.MessageType.ERROR,
+                    'QA 4 Error Manager',
+                    ei.string
+                )
+            )
         
         except Exception as E:
             try:
