@@ -201,7 +201,7 @@ class SplashUI(UI_OBJECT):
         self.close_button.config(text='\u00d7', command=self.close, style='Large.TButton', width=2)
         self.progress_bar.configure(style='Horizontal.TProgressbar')
 
-        self.app_name_lbl.config(text='Quizzing App', anchor=tk.W, justify=tk.LEFT)
+        self.app_name_lbl.config(text='', anchor=tk.W, justify=tk.LEFT)
         self.info_lbl.config(anchor=tk.W, justify=tk.LEFT, text=self._s[0])
 
         # Place elements

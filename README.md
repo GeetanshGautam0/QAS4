@@ -39,6 +39,13 @@ Alternatively, _if the above is set to `true`_, VL can temporarily be disabled b
 python qa_main.py [COMMAND] --disable_VLE
 ```
 
+
+---
+__NOTE__: Window resize events cause `update_ui` to be called. If verbose logging is enabled, this can lead to the 
+application lagging as the window is resized.
+
+It is highly recommended to explicitly add this flag unless you're debugging the application.
+
 ## Other App Settings (Only Configurable in Development)
 ```python
 # qa_std/qa_app_pol.py

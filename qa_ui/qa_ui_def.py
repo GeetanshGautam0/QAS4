@@ -115,8 +115,9 @@ class UI_OBJECT:
 
         return output
 
-    def apply_update_reqs(self, reqs: List[Any]) -> None:
+    def apply_update_reqs(self, reqs: List[Any], *_, **kwargs) -> None:
         self.toplevel.update()
+        weo = kwargs.get('_wraplength_events_only', False)
 
         for entry in reqs:
             _el, *requests = entry
@@ -129,6 +130,9 @@ class UI_OBJECT:
                 try:
                     assert isinstance(command, UC), 'Invalid command.'
                     assert isinstance(args, list), 'Invalid arguments.'
+
+                    if weo & (command != UC.WRAP_LENGTH):
+                        continue
 
                     match command:
                         case UC.BACKGROUND:
@@ -217,14 +221,21 @@ class UI_OBJECT:
     def _update_ui_plugin(self, *_, **__) -> None:
         return  # Add your own code here.
 
-    def update_ui(self) -> None:
-        self.load_theme()
-        self.apply_update_reqs(self.update_requests)
+    def update_ui(self, *_, **kwargs) -> None:
+        weo = kwargs.get('_wraplength_events_only', False)
 
-        # Extra computation goes here, if needed.
-        self._update_ui_plugin()
+        if not weo:
+            self.load_theme()
 
-        self.apply_update_reqs(self.post_update_req)
+        self.apply_update_reqs(self.update_requests, **kwargs)
+
+        if not weo:
+            # WRAP LENGTH COMMANDS SHOULD NOT BE ADDED TO POST_UPDATE_REQs.
+
+            # Extra computation goes here, if needed.
+            self._update_ui_plugin()
+
+            self.apply_update_reqs(self.post_update_req)
 
         # Functions to create update requests
         # The syntax for adding an update request:

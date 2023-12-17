@@ -128,6 +128,21 @@ class _UI(UI_OBJECT):
 
         self.update_ui()
 
+        self.toplevel.bind(
+            '<Configure>',
+            self._on_win_conf
+        )
+
+    def _on_win_conf(self, *_) -> None:
+        ws = [
+            self.toplevel.winfo_width(),
+            self.toplevel.winfo_height()
+        ]
+
+        if ws != self.window_size:
+            self.window_size = ws
+            self.update_ui(_wraplength_events_only=True)
+
     # Setting up frames
     def set_frame(self, frame: FrameID):
         assert frame in (FrameID.SELECTION_FRAME, FrameID.SCORE_MNG_FRAME, FrameID.CONFIGURE_FRAME), 'Unsupported frame'
@@ -176,10 +191,13 @@ class _UI(UI_OBJECT):
             [
                 self.sel_frame_title,
                 [
-                     uC.CUSTOM,
+                     uC.WRAP_LENGTH,
                      [
-                         lambda e, w, px: e.config(wraplength=(w-2*px)),
-                        'ELMNT', 'WND_W', 'PAD_X'
+                         (
+                             uC.CUSTOM,
+                            lambda e, w, px: w-2*px,
+                            'ELMNT', 'WND_W', 'PAD_X'
+                         )
                      ],
                 ]
              ]
