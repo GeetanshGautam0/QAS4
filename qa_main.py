@@ -295,6 +295,7 @@ def start_app(**kwargs: Optional[None]) -> None:
             app = AppID.Utilities
 
         case '_RDQ':
+            _run_essential_diagnostics_()
             sys.stdout.write('General app diagnostics complete. Run util to run all diagnostics.\n')
 
             # Terminate app

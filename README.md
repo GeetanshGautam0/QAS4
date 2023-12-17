@@ -25,15 +25,23 @@ _In `.conf\configuration.json`_:
 
 ```JSON
 {
-  ...
   "settings": {
-    ...
-    "LOG_VERB": true OR false
+    "LOG_VERB": true
   }
 }
 ```
 
-Alternatively, _if the above is set to `true`_, VL can temporarily be disabled by adding the flag `--disable_VLE` to the command.
+or,
+
+```JSON
+{
+  "settings": {
+    "LOG_VERB": false
+  }
+}
+```
+
+_If the above is set to `true`_, VL can **_temporarily_** be disabled by adding the flag `--disable_VLE` to the command.
 
 ```shell
 python qa_main.py [COMMAND] --disable_VLE
@@ -90,6 +98,14 @@ POLICY_MAX_WHILE_LOOP_RETRIES = 100_000
 #
 POLICY_FO_GEN_THEME_FILE_VERSION = 1
 #
+#
+# POLICY_CWRT_ENABLE_STDOUT
+#   Specifies whether the ConsoleWriter.STDOUT function is allowed to print messages to console.
+#
+#   NOTE: IF SET TO FALSE, LOG MESSAGES WILL NOT APPEAR IN CONSOLE BUT WILL STILL BE SAVED TO THE LOG FILE.
+#
+# Default: True
+POLICY_CWRT_ENABLE_STDOUT = True
 # ----------------------- Section Complete -----------------------
 ```
 
