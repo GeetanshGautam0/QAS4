@@ -26,7 +26,7 @@ DEPENDENCIES
 from tkinter import messagebox
 from enum import Enum
 from dataclasses import dataclass
-from typing import Callable, Tuple, Any
+from typing import Any
 
 
 class MessageBoxType(Enum):

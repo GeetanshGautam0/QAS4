@@ -1,5 +1,4 @@
 import tkinter as tk, traceback
-from threading import Thread
 from typing import (
     List, Tuple, SupportsIndex, Set,
     Optional, Any,

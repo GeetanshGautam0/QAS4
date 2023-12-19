@@ -27,7 +27,6 @@ import tkinter as tk
 from tkinter import messagebox
 from typing import cast, Any, Dict, Callable, Optional, Type
 from enum import Enum
-from time import sleep
 
 import qa_std.qa_diagnostics as Diagnostics
 from qa_std import (

@@ -76,7 +76,7 @@ class Logger(Thread):
     def FIO(self) -> object:
         return FileIO
 
-    def __init__(self) -> None:
+    def __init__(self) -> None:  # type: ignore
         self.thread = Thread
         self.thread.__init__(self, name="LoggerThread")
 

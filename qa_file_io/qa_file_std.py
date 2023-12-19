@@ -395,7 +395,7 @@ class FileIO:
                 qa_console_write.Write.emphasis('Trying to restore your data using a backup. DO NOT QUIT THE APP.')
 
                 try:
-                    FileIO._restore_from_backup_(file, backup_file, cb_crc32)
+                    FileIO._restore_from_backup_(file, backup_file, cb_crc32)  # type: ignore
 
                 except NameError:
                     raise Exception('[FATAL] Did not find backup file object.')

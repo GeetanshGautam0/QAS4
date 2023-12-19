@@ -2,6 +2,8 @@
 
 Quizzing app v4 is an open source, Python-based application centered around the task of creating and hosting quizzes/trivia, with a variety of features. 
 
+![Automated Tests](https://github.com/GeetanshGautam0/QAS4/actions/workflows/tests.yml/badge.svg)
+
 # Changelog
 
 # Running the Application

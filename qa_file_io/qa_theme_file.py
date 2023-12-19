@@ -60,8 +60,7 @@ RELEVANT POLICIES
 import os, io, json, zlib, hashlib, random
 
 from typing import (
-    cast, 
-    Literal, 
+    cast,
     List, 
     Dict, 
     Any
@@ -82,7 +81,6 @@ from . qa_file_std import (
     HeaderData,
     Header,
     HeaderVersionOne,
-    HeaderSection,
     GetMagicBytes
 )
 

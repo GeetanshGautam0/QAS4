@@ -35,12 +35,11 @@ from tkinter import ttk
 from typing import Optional, Callable, List, Any, cast
 
 from qa_std import (
-    LocaleManager,
     AppInfo,
     AppPolicy,
-    Logger, LoggingLevel, LogDataPacket
+    Logger, LogDataPacket
 )
-from qa_std.qa_def import UpdateVariables as uV, UpdateCommand as uC, Color, clamp
+from qa_std.qa_def import UpdateVariables as uV, Color, clamp
 from .qa_ui_def import UI_OBJECT
 
 _splash_logger: Optional[Logger] = None
