@@ -134,7 +134,7 @@ class Write:
             return True
 
     @staticmethod
-    def write(*data: Any, delim: str = ' ', line_termination: str = '\n', label="GENERAL") -> bool:
+    def write(*data: Any, delim: str = ' ', line_termination: str = '\n', label: str = "GENERAL") -> bool:
         try:
             stdout(
                 theme.FG,

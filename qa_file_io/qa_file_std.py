@@ -22,7 +22,7 @@ UNINIT: Uninitiated object.
 
 DEPENDENCIES
 
-    os
+    os, sys
     qa_std.qa_nvf_manager
     qa_std.qa_def
     qa_std.qa_dtc
@@ -43,7 +43,7 @@ Relevant App Policies
 
 """
 
-import os, random, gzip, hashlib, zlib, shutil
+import os, sys, random, gzip, hashlib, zlib, shutil
 
 from enum import Enum
 from threading import Timer, Thread
@@ -154,7 +154,8 @@ class IOHistory:
 
     def _clear_buffer(self) -> None:
         if not qa_nvf_manager.NVF.check_flag('AppRun'):
-            raise Exception('App not running.')
+            sys.stderr.write('[ERROR in QA 4 File Standardization] <IOHistory._clear_buffer> App not running.')
+            return
 
         self._buffer = []
         self.current_task = self.after(10, self._clear_buffer)
@@ -339,7 +340,7 @@ class FileIO:
         """
 
         if offload_to_new_thread and not isinstance(th, Thread):
-            th = Thread(target=lambda: self.write(file, data, secure_mode, append_mode, False)).start()
+            Thread(target=lambda: self.write(file, data, secure_mode, append_mode, False)).start()
             return True
 
         # Add a write event to the IO history

@@ -146,7 +146,7 @@ class ThemeFile:
     @staticmethod
     def _read_header_(fp: io.BytesIO) -> HeaderData:
 
-        header_length = sum([section.SectionLength for section in cast(List[HeaderSection], Header.items) if 1 in section.HeaderVersion])
+        header_length = sum([section.SectionLength for section in Header.items if 1 in section.HeaderVersion])
         header = fp.read(header_length)
 
         if len(header) != header_length:
@@ -166,7 +166,7 @@ class ThemeFile:
                          Header.HEADER_VERSION.SectionStart:(
                                  Header.HEADER_VERSION.SectionStart + Header.HEADER_VERSION.SectionLength
                          )]
-        header_version_int = int.from_bytes(header_version, cast(Literal["big", "little"], Header.byteorder))
+        header_version_int = int.from_bytes(header_version, Header.byteorder)
 
         match header_version_int:
             case 1:
@@ -402,7 +402,7 @@ class ThemeFile:
                 }
         }
 
-        assert len(output['content']), '0x0011:0x0007 Bad theme'
+        assert len(cast(List[Any], output['content'])), '0x0011:0x0007 Bad theme'
 
         # Generate checksum and hash values
         m_and_c = json.dumps(output).encode()

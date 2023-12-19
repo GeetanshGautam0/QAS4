@@ -54,40 +54,40 @@ def show_message(message: Message) -> MessageBoxType:
     match message.msg_t:
 
         case MessageType.ERROR:
-            fn = (_CMB.error, messagebox.showerror)
+            fn = (_CMB.error, messagebox.showerror)  # type: ignore
 
         case MessageType.WARNING:
-            fn = (_CMB.warn, messagebox.showwarning)
+            fn = (_CMB.warn, messagebox.showwarning)  # type: ignore
 
         case MessageType.SUCCESS:
-            fn = (_CMB.success, messagebox.showinfo)
+            fn = (_CMB.success, messagebox.showinfo)  # type: ignore
 
         case _:
-            fn = (_CMB.info, messagebox.showinfo)
+            fn = (_CMB.info, messagebox.showinfo)  # type: ignore
 
     try:
-        fn[0](message)
+        fn[0](message)  # type: ignore
         return MessageBoxType.CUSTOM
 
     except Exception as _:
-        fn[1](message.title, message.text)
+        fn[1](message.title, message.text)  # type: ignore
         return MessageBoxType.TKINTER
 
 
 class _CMB:
     @staticmethod
-    def error(*_) -> None:
+    def error(*_: Any) -> None:
         raise NotImplementedError
 
     @staticmethod
-    def warn(*_) -> None:
+    def warn(*_: Any) -> None:
         raise NotImplementedError
 
     @staticmethod
-    def success(*_) -> None:
+    def success(*_: Any) -> None:
         raise NotImplementedError
 
     @staticmethod
-    def info(*_) -> None:
+    def info(*_: Any) -> None:
         raise NotImplementedError
 

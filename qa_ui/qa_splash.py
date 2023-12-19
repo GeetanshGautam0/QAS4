@@ -32,7 +32,7 @@ DEPENDENCIES
 
 import tkinter as tk, sys
 from tkinter import ttk
-from typing import Optional, Callable, List
+from typing import Optional, Callable, List, Any, cast
 
 from qa_std import (
     LocaleManager,
@@ -61,7 +61,7 @@ class SplashUI(UI_OBJECT):
 
         self.screen_size = (self._master.winfo_screenwidth(), self._master.winfo_screenheight())
         self.window_size = [int(0.4 * self.screen_size[0]), ]
-        self.window_size = (self.window_size[0], int(self.window_size[0] * ws_ratio))
+        self.window_size = (self.window_size[0], int(self.window_size[0] * ws_ratio))  # type: ignore
         self.screen_size = (
             self.screen_size[0] // 2 - self.window_size[0] // 2,
             self.screen_size[1] // 2 - self.window_size[1] // 2
@@ -94,7 +94,7 @@ class SplashUI(UI_OBJECT):
     def toplevel(self) -> tk.Tk | tk.Toplevel:
         return self._tl
 
-    def close(self) -> None:
+    def close(self) -> bool:
         self._tf()  # Call the termination routine
 
         self._master.after(0, self._master.quit)
@@ -104,6 +104,8 @@ class SplashUI(UI_OBJECT):
         except Exception as _:
             pass
 
+        return True
+
     @property
     def complete_boot(self) -> bool:
         return len(self._s) == self._progress_tracker
@@ -111,64 +113,65 @@ class SplashUI(UI_OBJECT):
     @property
     def grad(self) -> List[str]:
         if self._v73:
-            return self._g
+            return cast(List[str], self._g)
 
         else:
             self.load_theme()
-            self._g = Color.fade(self._theme.background.color, self._theme.accent.color)
+            self._g = Color.fade(self._theme.background.color, self._theme.accent.color)  # type: ignore
             self._v73 = True
 
-            return self._g
+            return cast(List[str], self._g)
 
     @staticmethod
     def log(ldp: LogDataPacket) -> None:
         global _splash_logger
-        _splash_logger.write(ldp)
+        if isinstance(_splash_logger, Logger):
+            _splash_logger.write(ldp)
 
-    def _update_ui_plugin(self, *_, **__) -> None:
+    def _update_ui_plugin(self, *_: Any, **__: Any) -> None:
         self.style.configure(
             "Horizontal.TProgressbar",
             foreground=self.grad[0],
             background=self.grad[0],
-            troughcolor=self._theme.background.color,
+            troughcolor=self._theme.background.color,  # type: ignore
             borderwidth=0,
             thickness=2
         )
 
         self.style.configure(
             'TButton',
-            background=self._theme.background.color,
-            foreground=self._theme.accent.color,
-            font=(self._theme.font_face, self._theme.font_size_normal),
-            focuscolor=self._theme.accent.color,
-            bordercolor=self._theme.border_color.color,
-            borderwidth=self._theme.border_radius,
-            highlightcolor=self._theme.border_color.color,
-            highlightthickness=self._theme.border_radius
+            background=self._theme.background.color,  # type: ignore
+            foreground=self._theme.accent.color,  # type: ignore
+            font=(self._theme.font_face, self._theme.font_size_normal),  # type: ignore
+            focuscolor=self._theme.accent.color,  # type: ignore
+            bordercolor=self._theme.border_color.color,  # type: ignore
+            borderwidth=self._theme.border_radius,  # type: ignore
+            highlightcolor=self._theme.border_color.color,  # type: ignore
+            highlightthickness=self._theme.border_radius  # type: ignore
         )
 
         self.style.map(
             'TButton',
-            background=[('active', self._theme.accent.color), ('disabled', self._theme.background.color), ('readonly', self._theme.grey.color)],
-            foreground=[('active', self._theme.background.color), ('disabled', self._theme.grey.color), ('readonly', self._theme.background.color)]
+            background=[('active', self._theme.accent.color), ('disabled', self._theme.background.color), ('readonly', self._theme.grey.color)],  # type: ignore
+            foreground=[('active', self._theme.background.color), ('disabled', self._theme.grey.color), ('readonly', self._theme.background.color)]  # type: ignore
         )
 
         self.style.configure(
             'Large.TButton',
-            background=self._theme.background.color,
-            foreground=self._theme.accent.color,
-            font=(self._theme.font_face, self._theme.font_size_large),
-            focuscolor=self._theme.accent.color,
-            bordercolor=self._theme.border_color.color,
-            borderwidth=self._theme.border_radius,
-            highlightcolor=self._theme.border_color.color,
-            highlightthickness=self._theme.border_radius
+            background=self._theme.background.color,  # type: ignore
+            foreground=self._theme.accent.color,  # type: ignore
+            font=(self._theme.font_face, self._theme.font_size_large),  # type: ignore
+            focuscolor=self._theme.accent.color,  # type: ignore
+            bordercolor=self._theme.border_color.color,  # type: ignore
+            borderwidth=self._theme.border_radius,  # type: ignore
+            highlightcolor=self._theme.border_color.color,  # type: ignore
+            highlightthickness=self._theme.border_radius  # type: ignore
         )
 
         self.style.map(
             'Large.TButton',
-            background=[('active', self._theme.accent.color), ('disabled', self._theme.background.color), ('readonly', self._theme.grey.color)],
-            foreground=[('active', self._theme.background.color), ('disabled', self._theme.grey.color), ('readonly', self._theme.background.color)]
+            background=[('active', self._theme.accent.color), ('disabled', self._theme.background.color), ('readonly', self._theme.grey.color)],  # type: ignore
+            foreground=[('active', self._theme.background.color), ('disabled', self._theme.grey.color), ('readonly', self._theme.background.color)]  # type: ignore
         )
 
         self._t_upd()
@@ -182,7 +185,7 @@ class SplashUI(UI_OBJECT):
         self.pad_x = 20 if 20 < self.window_size[0] // 20 else 0
         self.pad_y = 10 if 10 < self.window_size[1] // 20 else 0
 
-        self.VLE_ENABLED = not _splash_logger.DISABLE_VLE
+        self.VLE_ENABLED = not cast(Logger, _splash_logger).DISABLE_VLE
 
         # Configure the window frame
 
@@ -266,7 +269,7 @@ class SplashUI(UI_OBJECT):
 
             self.pb_var.set(pi/resolution)
 
-            col = g[clamp(0, int(pi/resolution/100 * l), l - 1)]
+            col = g[cast(int, clamp(0, int(pi/resolution/100 * l), l - 1))]
 
             self.style.configure("Horizontal.TProgressbar", foreground=col, background=col)
             self.app_name_lbl.config(fg=col)

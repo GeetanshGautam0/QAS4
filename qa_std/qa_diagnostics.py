@@ -18,6 +18,8 @@ DEPENDENCIES
 
 """
 
+import sys
+
 from . import locale as M_locale
 from . import qa_def as M_qa_def
 from . import qa_dtc as M_qa_dtc
@@ -29,11 +31,17 @@ from . import qa_app_pol as AppPolicy
 
 from qa_ui import qa_ui_def as M_qa_ui_def
 
-from typing import Callable, Any, Type
+from typing import Callable, Any, Type, cast
 from tkinter import Label
 
 
-_global_logger: Logger.Logger
+class _PHL:
+    @staticmethod
+    def write(ldp: Logger.LogDataPacket) -> None:
+        sys.stdout.write(f'{ldp.data}\n')
+
+
+_global_logger: Logger.Logger = cast(Logger.Logger, _PHL)
 ModulePolicy = AppPolicy.PolicyManager.Module('Diagnostics', 'qa_diagnostics.py')
 
 
@@ -323,8 +331,8 @@ class ModDiagnostics:
     #   DICT    --> INT                         0xF001:0x001E
     @staticmethod
     def _qa_dtc_to_int() -> bool:
-        _raises(ValueError, M_qa_dtc.convert, int, ModDiagnostics._qa_dtc_test_str, cfa=ModDiagnostics._qa_dtc_test_cfa)
-        _raises(ValueError, M_qa_dtc.convert, int, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        _raises(ValueError, M_qa_dtc.convert, int, ModDiagnostics._qa_dtc_test_str, cfa=ModDiagnostics._qa_dtc_test_cfa)  # type: ignore
+        _raises(ValueError, M_qa_dtc.convert, int, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)  # type: ignore
         from_float = M_qa_dtc.convert(int, ModDiagnostics._qa_dtc_test_float, cfa=ModDiagnostics._qa_dtc_test_cfa)
         from_list = M_qa_dtc.convert(int, [7392639, 33, 3984.484], cfa=ModDiagnostics._qa_dtc_test_cfa)
         from_tuple = M_qa_dtc.convert(int, (7392639, 33, 3984.484), cfa=ModDiagnostics._qa_dtc_test_cfa)
@@ -363,8 +371,8 @@ class ModDiagnostics:
     #   DICT    --> FLOAT                         0xF001:0x0027
     @staticmethod
     def _qa_dtc_to_float() -> bool:
-        _raises(ValueError, M_qa_dtc.convert, float, ModDiagnostics._qa_dtc_test_str, cfa=ModDiagnostics._qa_dtc_test_cfa)
-        _raises(ValueError, M_qa_dtc.convert, float, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)
+        _raises(ValueError, M_qa_dtc.convert, float, ModDiagnostics._qa_dtc_test_str, cfa=ModDiagnostics._qa_dtc_test_cfa)  # type: ignore
+        _raises(ValueError, M_qa_dtc.convert, float, ModDiagnostics._qa_dtc_test_bytes, cfa=ModDiagnostics._qa_dtc_test_cfa)  # type: ignore
         from_int = M_qa_dtc.convert(float, 123123, cfa=ModDiagnostics._qa_dtc_test_cfa)
         from_list = M_qa_dtc.convert(float, [7392639, 33, 3984.484], cfa=ModDiagnostics._qa_dtc_test_cfa)
         from_tuple = M_qa_dtc.convert(float, (7392639, 33, 3984.484), cfa=ModDiagnostics._qa_dtc_test_cfa)

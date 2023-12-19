@@ -21,7 +21,7 @@ DEPENDENCIES
 
 import tkinter as tk
 from tkinter import ttk, Tk
-from typing import Optional, cast, Union, List
+from typing import Optional, cast, Union, List, Any
 from enum import Enum
 
 import qa_std as STD
@@ -61,8 +61,10 @@ class _UI(UI_OBJECT):
 
         self._theme: Optional[STD.ThemeManager.Theme] = None
         self.inputs: List[
-            tk.Button, tk.Radiobutton, tk.Checkbutton, tk.Entry, tk.Text,
-            ttk.Button, ttk.Radiobutton, ttk.Checkbutton, ttk.Entry,
+            Union[
+                tk.Button, tk.Radiobutton, tk.Checkbutton, tk.Entry, tk.Text,
+                ttk.Button, ttk.Radiobutton, ttk.Checkbutton, ttk.Entry
+            ]
         ] = []
 
         self._data = {
@@ -101,7 +103,8 @@ class _UI(UI_OBJECT):
     @staticmethod
     def log(ldp: STD.LogDataPacket) -> None:
         global _admin_tools_logger
-        _admin_tools_logger.write(ldp)
+        if isinstance(_admin_tools_logger, STD.Logger):
+            _admin_tools_logger.write(ldp)
 
     def run(self) -> None:
         global _admin_tools_logger
@@ -118,7 +121,7 @@ class _UI(UI_OBJECT):
         self.pad_y = 10 if 10 < self.window_size[1] / 20 else 0  # PadX = 10 if 10 < 5% of the window height, else 0
 
         # Set VLE_ENABLED
-        self.VLE_ENABLED = not _admin_tools_logger.DISABLE_VLE
+        self.VLE_ENABLED = not cast(STD.Logger, _admin_tools_logger).DISABLE_VLE
 
         # Create update requests
         self._crt_updt_req_frame(self._top_level)  # Create an update req for _top_level
@@ -133,18 +136,18 @@ class _UI(UI_OBJECT):
             self._on_win_conf
         )
 
-    def _on_win_conf(self, *_) -> None:
+    def _on_win_conf(self, *_: Any) -> None:
         ws = [
             self.toplevel.winfo_width(),
             self.toplevel.winfo_height()
         ]
 
         if ws != self.window_size:
-            self.window_size = ws
+            self.window_size = ws  # type: ignore
             self.update_ui(_wraplength_events_only=True)
 
     # Setting up frames
-    def set_frame(self, frame: FrameID):
+    def set_frame(self, frame: FrameID) -> None:
         assert frame in (FrameID.SELECTION_FRAME, FrameID.SCORE_MNG_FRAME, FrameID.CONFIGURE_FRAME), 'Unsupported frame'
 
         self.disable_all_inputs()
@@ -172,7 +175,7 @@ class _UI(UI_OBJECT):
 
             # This is the first time this function has been called; place the elements in the frame.
             self.sel_frame_title.config(text='Administrator Tools')
-            self.sel_frame_title.pack(fill=tk.X, expand=True, padx=self.pad_x, pady=self.pad_y)
+            self.sel_frame_title.pack(fill=tk.X, expand=True, padx=self.pad_x, pady=self.pad_y)  # type: ignore
 
         self._data[FrameID.SELECTION_FRAME]['_upt_req_submitted'] = True
 

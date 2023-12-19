@@ -100,7 +100,7 @@ class ConfigurationFile:
     config: Configuration
 
     @staticmethod
-    def load_file():
+    def load_file() -> None:
         assert os.path.isfile(ConfigurationFile.loc), '0x0000:0x0001'
         with open(ConfigurationFile.loc, 'r') as configuration_file:
             raw = configuration_file.read()

@@ -94,7 +94,7 @@ class NVF:
         return n - 1
 
     @staticmethod
-    def yield_all_flags() -> Generator:
+    def yield_all_flags() -> Generator[str | None, None, None]:
         if not os.path.isdir(qa_app_info.Storage.NonvolatileFlagDir):
             yield None
             

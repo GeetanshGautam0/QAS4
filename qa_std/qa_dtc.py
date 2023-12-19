@@ -92,10 +92,10 @@ CUSTOM = ()                                     # Custom
 class ConvertToDefaultType:
     def __init__(
             self,
-            output_type: Type,
-            data_type: Type,
-            supported_output_type: Type,
-            supported_data_types: Tuple[Type],
+            output_type: type,
+            data_type: type,
+            supported_output_type: type,
+            supported_data_types: Tuple[Type[Any], ...],
             *args: Any,
             **kwargs: Any
     ) -> None:
@@ -119,26 +119,25 @@ class ConvertToDefaultType:
         assert data_type in supported_data_types, '0x100000'
         assert output_type is supported_output_type, '0x100001'
 
-        self.encoding = locale.get_locale().encoding
+        self.encoding = cast(str, locale.get_locale().encoding)
 
         self.cfa = kwargs.get('cfa')
         if not isinstance(self.cfa, CFA):
             self.cfa = CFA()
 
-    def _reload_encoding_(self, *args, **kwargs):
-        self.encoding = locale.get_locale().encoding
+    def _reload_encoding_(self, *_: Any, **__: Any) -> None:
+        self.encoding = cast(str, locale.get_locale().encoding)
 
 
 class LIST(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), list, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
-    def go(self) -> list:
-        return cast(list,
-            {
+    def go(self) -> List[Any]:
+        return {
                 str: self._str,
                 bytes: self._bytes,
                 bool: self._bool,
@@ -149,72 +148,71 @@ class LIST(ConvertToDefaultType):
                 tuple: self._tuple,
                 dict: self._dict
             }[type(self.d)]()
-        )
 
-    def _str(self) -> list:
-        return cast(str, self.d).split(self.cfa.list_delim)
+    def _str(self) -> List[Any]:
+        return cast(str, self.d).split(cast(CFA, self.cfa).list_delim)
 
-    def _bytes(self) -> list:
-        return cast(bytes, self.d).split(self.cfa.list_delim.encode(self.encoding))
+    def _bytes(self) -> List[Any]:
+        return cast(bytes, self.d).split(cast(CFA, self.cfa).list_delim.encode(self.encoding))
 
-    def _bool(self) -> list:
+    def _bool(self) -> List[Any]:
         return [] if cast(bool, self.d) else [1]
 
-    def _int(self) -> list:
+    def _int(self) -> List[Any]:
         return [self.d]
 
-    def _float(self) -> list:
+    def _float(self) -> List[Any]:
         return [self.d]
 
-    def _complex(self) -> list:
+    def _complex(self) -> List[Any]:
         return [cast(complex, self.d).real, cast(complex, self.d).imag]
 
-    def _set(self) -> list:
-        return [*cast(set, self.d)]
+    def _set(self) -> List[Any]:
+        return [*cast(Set[Any], self.d)]
 
-    def _tuple(self) -> list:
-        return [*cast(tuple, self.d)]
+    def _tuple(self) -> List[Any]:
+        return [*cast(Tuple[Any], self.d)]
 
-    def _dict(self) -> list:
+    def _dict(self) -> List[Any]:
         return [
-            f'{convert(str, k, cfa=self.cfa)}{self.cfa.dict_kv_delim}{convert(str, v, cfa=self.cfa)}'
-            for k, v in cast(dict, self.d).items()
+            f'{convert(str, k, cfa=self.cfa)}{cast(CFA, self.cfa).dict_kv_delim}{convert(str, v, cfa=self.cfa)}'
+            for k, v in cast(Dict[Any, Any], self.d).items()
         ]
 
 
 class TUPLE(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), tuple, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
-    def go(self) -> tuple:
+    def go(self) -> Tuple[Any, ...]:
         return (*convert(list, self.d, cfa=self.cfa),)
 
 
 class SET(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), set, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
-    def go(self) -> set:
+    def go(self) -> Set[Any]:
         return {*convert(list, self.d, cfa=self.cfa),}
 
 
 class DICT(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), dict, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
-    def go(self) -> dict:
+    def go(self) -> Dict[Any, Any]:
         return cast(
-            dict,
-            {
+            Dict[Any, Any],
+            {  # type: ignore
                 str: self._str,
                 bytes: self._bytes,
                 bool: self._bool,
@@ -227,7 +225,7 @@ class DICT(ConvertToDefaultType):
             }[type(self.d)]()
         )
 
-    def _str(self) -> dict:
+    def _str(self) -> Dict[Any, Any]:
         self.d = cast(str, self.d).strip()
 
         if self.d[0] == '{':
@@ -238,18 +236,18 @@ class DICT(ConvertToDefaultType):
             assert len(self.d) >= 2
             self.d = self.d[:-1]
 
-        e = cast(str, self.d).split(self.cfa.dict_entry_delim)
+        e = self.d.split(cast(CFA, self.cfa).dict_entry_delim)
         o = {}
 
         for entry in e:
-            k = entry.split(self.cfa.dict_kv_delim)[0].strip(self.cfa.dict_kv_delim).strip()
-            v = entry.replace(k, '', 1).strip(self.cfa.dict_kv_delim).strip()
+            k = entry.split(cast(CFA, self.cfa).dict_kv_delim)[0].strip(cast(CFA, self.cfa).dict_kv_delim).strip()
+            v = entry.replace(k, '', 1).strip(cast(CFA, self.cfa).dict_kv_delim).strip()
 
             o[k] = v
 
         return o
 
-    def _bytes(self) -> dict:
+    def _bytes(self) -> Dict[Any, Any]:
         self.d = cast(bytes, self.d).strip()
 
         if self.d[0] in ('{'.encode(self.encoding), ord('{'.encode(self.encoding))):
@@ -260,49 +258,49 @@ class DICT(ConvertToDefaultType):
             assert len(self.d) >= 2
             self.d = self.d[:-1]
 
-        e = cast(bytes, self.d).split(self.cfa.dict_entry_delim.encode(self.encoding))
+        e = self.d.split(cast(CFA, self.cfa).dict_entry_delim.encode(self.encoding))
         o = {}
 
         for entry in e:
-            k = entry.split(self.cfa.dict_kv_delim.encode(self.encoding))[0].strip(
-                self.cfa.dict_kv_delim.encode(self.encoding)).strip()
+            k = entry.split(cast(CFA, self.cfa).dict_kv_delim.encode(self.encoding))[0].strip(
+                cast(CFA, self.cfa).dict_kv_delim.encode(self.encoding)).strip()
             v = entry.replace(k, ''.encode(self.encoding), 1).strip(
-                self.cfa.dict_kv_delim.encode(self.encoding)).strip()
+                cast(CFA, self.cfa).dict_kv_delim.encode(self.encoding)).strip()
 
             o[k] = v
 
         return o
 
-    def _bool(self) -> dict:
+    def _bool(self) -> Dict[Any, Any]:
         return {} if not self.d else {1: True}
 
-    def _int(self) -> dict:
+    def _int(self) -> Dict[Any, Any]:
         return {0: self.d}
 
-    def _float(self) -> dict:
+    def _float(self) -> Dict[Any, Any]:
         return {0: self.d}
 
-    def _complex(self) -> dict:
+    def _complex(self) -> Dict[Any, Any]:
         return {
             'real': cast(complex, self.d).real,
             'imaginary': cast(complex, self.d).imag
         }
 
-    def _set(self) -> dict:
-        return self._list([*cast(set, self.d)])
+    def _set(self) -> Dict[Any, Any]:
+        return self._list([*cast(Set[Any], self.d)])
 
-    def _tuple(self) -> dict:
-        return self._list([*cast(tuple, self.d)])
+    def _tuple(self) -> Dict[Any, Any]:
+        return self._list([*cast(Tuple[Any, ...], self.d)])
 
-    def _list(self, d: Optional[list]) -> dict:
-        data = d if isinstance(d, list) else cast(list, self.d)
+    def _list(self, d: Optional[List[Any]]) -> Dict[Any, Any]:
+        data = d if isinstance(d, list) else cast(List[Any], self.d)
         o = {}
 
         for e in data:
             tp = type(e)
             ep = convert(str, e, cfa=self.cfa)
 
-            k = ep.split(self.cfa.dict_kv_delim)[0]
+            k = ep.split(cast(CFA, self.cfa).dict_kv_delim)[0]
             v = ep.replace(k, '', 1)
 
             o[k] = convert(tp, v, cfa=self.cfa)
@@ -313,9 +311,9 @@ class DICT(ConvertToDefaultType):
 # Default non-aggregate
 
 class STRING(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), str, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
         self._reload_encoding_()
@@ -325,9 +323,9 @@ class STRING(ConvertToDefaultType):
 
 
 class INTEGER(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), int, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
@@ -336,16 +334,16 @@ class INTEGER(ConvertToDefaultType):
 
 
 class FLOAT(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), float, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
     def go(self) -> float:
         return cast(
             float,
-            {
+            {  # type: ignore
                 str: self._str,
                 bytes: self._bytes,
                 int: self._int,
@@ -365,35 +363,35 @@ class FLOAT(ConvertToDefaultType):
         return float(cast(bytes, self.d).decode(self.encoding))
 
     def _int(self) -> float:
-        return self.d
+        return cast(float, self.d)
 
     def _complex(self) -> float:
         return float(cast(complex, self.d).real)
 
-    def _list(self, d: Optional[List] = None) -> float:
+    def _list(self, d: Optional[List[Any]] = None) -> float:
         if isinstance(d, list):
-            data = cast(list, d)
+            data = d
 
         else:
-            data = cast(list, self.d)
+            data = cast(List[Any], self.d)
 
-        match self.cfa.aggregate_to_numerical_conversion:
+        match cast(CFA, self.cfa).aggregate_to_numerical_conversion:
             case 0:
                 # Length
-                return len(data)
+                return len(data)  # type: ignore
 
             case 1:
-                return sum([convert(int, e, cfa=self.cfa) for e in data])
+                return sum([convert(int, e, cfa=cast(CFA, self.cfa)) for e in data])  # type: ignore
 
             case 2:
-                return sum([convert(int, e, cfa=self.cfa) for e in data])
+                return sum([convert(int, e, cfa=cast(CFA, self.cfa)) for e in data])  # type: ignore
 
             case 3:
-                return sum([convert(int, e, cfa=self.cfa) for e in data])
+                return sum([convert(int, e, cfa=cast(CFA, self.cfa)) for e in data])  # type: ignore
 
             case _:
                 stderr.write(f'[WARNING] [QA-DTC] [AGGREGATE --> NUMERICAL] Invalid value for ANC var. Default to 0\n')
-                self.cfa.aggregate_to_numerical_conversion = 0
+                cast(CFA, self.cfa).aggregate_to_numerical_conversion = 0
                 return self._list(data)
 
     def _tuple(self) -> float:
@@ -403,24 +401,24 @@ class FLOAT(ConvertToDefaultType):
         return self._list(d=[*self.d])
 
     def _dict(self) -> float:
-        match self.cfa.aggregate_to_numerical_conversion:
+        match cast(CFA, self.cfa).aggregate_to_numerical_conversion:
             case 0:
-                return len(self.d)
+                return len(self.d)  # type: ignore
 
             case 1:
-                return sum([convert(float, e, cfa=self.cfa) for e in self.d.keys()])
+                return sum([convert(float, e, cfa=self.cfa) for e in self.d.keys()])  # type: ignore
 
             case 2:
-                return sum([convert(float, e, cfa=self.cfa) for e in self.d.values()])
+                return sum([convert(float, e, cfa=self.cfa) for e in self.d.values()])  # type: ignore
 
             case 3:
-                return sum(
+                return sum(  # type: ignore
                     [convert(float, k, cfa=self.cfa) + convert(float, v, cfa=self.cfa) for k, v in self.d.items()]
                 )
 
             case _:
                 stderr.write(f'[WARNING] [QA-DTC] [DICT --> NUMERICAL] Invalid value for ANC var. Default to 0\n')
-                self.cfa.aggregate_to_numerical_conversion = 0
+                cast(CFA, self.cfa).aggregate_to_numerical_conversion = 0
                 return self._dict()
 
     def _bool(self) -> float:
@@ -428,9 +426,9 @@ class FLOAT(ConvertToDefaultType):
 
 
 class COMPLEX(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), complex, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
@@ -453,7 +451,7 @@ class COMPLEX(ConvertToDefaultType):
 
         :return: complex
         """
-        return complex({
+        return complex({  # type: ignore
             str: self._str,
             bytes: self._bytes,
             int: self._int,
@@ -485,7 +483,7 @@ class COMPLEX(ConvertToDefaultType):
     def _bool(d: bool) -> complex: return complex(1 if d else 0, 0)
 
     @staticmethod
-    def _list(d: list) -> complex:
+    def _list(d: List[Any]) -> complex:
         if 0 < len(d) <= 2:
             return complex(*d)
 
@@ -493,13 +491,13 @@ class COMPLEX(ConvertToDefaultType):
             return complex(len(d), 0)
 
     @staticmethod
-    def _tuple(d: tuple) -> complex: return COMPLEX._list(cast(list, d))
+    def _tuple(d: Tuple[Any, ...]) -> complex: return COMPLEX._list(cast(List[Any], d))
 
     @staticmethod
-    def _set(d: set) -> complex: return COMPLEX._list(cast(list, d))
+    def _set(d: Set[Any]) -> complex: return COMPLEX._list(cast(List[Any], d))
 
     @staticmethod
-    def _dict(d: dict) -> complex:
+    def _dict(d: Dict[Any, Any]) -> complex:
         if 'real' in d or 'imag' in d:
             return complex(d.get('real', 0), d.get('imaginary', 0))
 
@@ -508,9 +506,9 @@ class COMPLEX(ConvertToDefaultType):
 
 
 class BYTES(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), bytes, self.supported_types, *args, **kwargs)
         self._reload_encoding_()
         self.ot, self.d = output_type, data
@@ -518,7 +516,7 @@ class BYTES(ConvertToDefaultType):
     def go(self) -> bytes:
         return cast(
             bytes,
-            {
+            {  # type: ignore
                 str: self._str,
                 int: self._int,
                 float: self._float,
@@ -546,11 +544,11 @@ class BYTES(ConvertToDefaultType):
         o: bytes = paren[0].encode(self.encoding)
         l = self.d if not isinstance(d, list) else d
 
-        for i, el in enumerate(cast(list, l)):
+        for i, el in enumerate(cast(List[Any], l)):
             o += convert(bytes, el, cfa=self.cfa)
 
             if i != len(l) - 1:
-                o += self.cfa.list_delim.encode(self.encoding)
+                o += cast(CFA, self.cfa).list_delim.encode(self.encoding)
 
         o += paren[1].encode(self.encoding)
         return o
@@ -562,13 +560,13 @@ class BYTES(ConvertToDefaultType):
     def _dict(self) -> bytes:
         o: bytes = '{'.encode(self.encoding)
 
-        for i, (k, v) in enumerate(cast(dict, self.d).items()):
+        for i, (k, v) in enumerate(cast(Dict[Any, Any], self.d).items()):
             o += convert(bytes, k, cfa=self.cfa)
-            o += self.cfa.dict_kv_delim.encode(self.encoding)
+            o += cast(CFA, self.cfa).dict_kv_delim.encode(self.encoding)
             o += convert(bytes, v, cfa=self.cfa)
 
             if i != len(self.d) - 1:
-                o += self.cfa.dict_entry_delim.encode(self.encoding)
+                o += cast(CFA, self.cfa).dict_entry_delim.encode(self.encoding)
 
         o += '}'.encode(self.encoding)
 
@@ -576,9 +574,9 @@ class BYTES(ConvertToDefaultType):
 
 
 class BOOLEAN(ConvertToDefaultType):
-    supported_types: Tuple[Type] = (*DNA, *DA)
+    supported_types: Tuple[Type[Any], ...] = (*DNA, *DA)
 
-    def __init__(self, output_type: Type, data: Any, *args, **kwargs) -> None:
+    def __init__(self, output_type: type, data: Any, *args: Any, **kwargs: Any) -> None:
         ConvertToDefaultType.__init__(self, output_type, type(data), bool, self.supported_types, *args, **kwargs)
         self.ot, self.d = output_type, data
 
@@ -598,7 +596,7 @@ class BOOLEAN(ConvertToDefaultType):
 
         :return: (bool)True or (bool)False
         """
-        return bool({
+        return bool({  # type: ignore
             str: self._str,
             bytes: self._bytes,
             int: self._int,
@@ -611,10 +609,10 @@ class BOOLEAN(ConvertToDefaultType):
         }[type(self.d)](self.d))
 
     @staticmethod
-    def _str(d: str) -> bool: return ('t' in d.lower()) & ~('f' in d.lower())
+    def _str(d: str) -> bool: return ('t' in d.lower()) and not ('f' in d.lower())
 
     @staticmethod
-    def _bytes(d: bytes) -> bool: return (b't' in d.lower()) & ~(b'f' in d.lower())
+    def _bytes(d: bytes) -> bool: return (b't' in d.lower()) and not (b'f' in d.lower())
 
     @staticmethod
     def _int(d: int) -> bool: return bool(d)
@@ -626,19 +624,19 @@ class BOOLEAN(ConvertToDefaultType):
     def _complex(d: complex) -> bool: return bool(d.real + d.imag)
 
     @staticmethod
-    def _list(d: list) -> bool: return BOOLEAN._int(len(d))
+    def _list(d: List[Any]) -> bool: return BOOLEAN._int(len(d))
 
     @staticmethod
-    def _tuple(d: tuple) -> bool: return BOOLEAN._int(len(d))
+    def _tuple(d: Tuple[Any, ...]) -> bool: return BOOLEAN._int(len(d))
 
     @staticmethod
-    def _set(d: set) -> bool: return BOOLEAN._int(len(d))
+    def _set(d: Set[Any]) -> bool: return BOOLEAN._int(len(d))
 
     @staticmethod
-    def _dict(d: dict) -> bool: return BOOLEAN._int(len(d))
+    def _dict(d: Dict[Any, Any]) -> bool: return BOOLEAN._int(len(d))
 
 
-def convert(output_type: Type, data: Any, *args: Any, **kwargs: Any) -> Any:
+def convert(output_type: type, data: Any, *args: Any, **kwargs: Any) -> Any:
     """
     Quizzing App Data Type Convertor (Public Fn.)
 
@@ -662,14 +660,14 @@ def convert(output_type: Type, data: Any, *args: Any, **kwargs: Any) -> Any:
     """
 
     # If the data is already of the correct type, then do not waste time running any of the following code.
-    if isinstance(data, output_type):
+    if isinstance(data, output_type):  # type: ignore
         return data
 
     assert isinstance(data, (*DNA, *DA, *CUSTOM)),          f'0x000001 {type(data)}'
     assert output_type in (*DNA, *DA, *CUSTOM),             f'0x000002 {output_type}'
 
     # Call the function
-    return cast(Dict[Type, Any], {
+    return cast(Dict[type, Any], {
         str: STRING,
         int: INTEGER,
         float: FLOAT,

@@ -21,8 +21,8 @@ class UI_OBJECT:
         super(UI_OBJECT, self).__init__()
 
         self.VLE_ENABLED = True
-        self.update_requests: List[List[tk.Widget, Tuple[UC, List[Any, ...]]]] = []
-        self.post_update_req: List[List[tk.Widget, Tuple[UC, List[Any, ...]]]] = []
+        self.update_requests: List[List[tk.Widget, Tuple[UC, List[Any, ...]]]] = []  # type: ignore
+        self.post_update_req: List[List[tk.Widget, Tuple[UC, List[Any, ...]]]] = []  # type: ignore
 
         self._theme: Optional[ThemeManager.Theme] = None
 
@@ -56,25 +56,25 @@ class UI_OBJECT:
     def _ureq_manage_args(self, element: tk.Widget, args: List[Any] | Tuple[Any] | Set[Any] | SupportsIndex) -> List[Any]:
         output = []
 
-        for arg in args:
+        for arg in args:  # type: ignore
 
             if arg in UV.__members__.values():
                 arg = {
-                    UV.BACKGROUND: self._theme.background.color,
-                    UV.FOREGROUND: self._theme.foreground.color,
-                    UV.BORDER_COLOR: self._theme.border_color.color,
-                    UV.BORDER_WIDTH: self._theme.border_radius,
-                    UV.ACCENT_COLOR: self._theme.accent.color,
-                    UV.ERROR_COLOR: self._theme.error.color,
-                    UV.WARNING_COLOR: self._theme.warning.color,
-                    UV.GRAY_COLOR: self._theme.grey.color,
-                    UV.OK_COLOR: self._theme.successful.color,
-                    UV.FONT_FACE: self._theme.font_face,
-                    UV.TITLE_FONT_FACE: self._theme.title_font_face,
-                    UV.TITLE_FONT_SIZE: self._theme.font_size_title,
-                    UV.LARGE_FONT_SIZE: self._theme.font_size_large,
-                    UV.NORML_FONT_SIZE: self._theme.font_size_normal,
-                    UV.SMALL_FONT_SIZE: self._theme.font_size_small,
+                    UV.BACKGROUND: cast(ThemeManager.Theme, self._theme).background.color,
+                    UV.FOREGROUND: cast(ThemeManager.Theme, self._theme).foreground.color,
+                    UV.BORDER_COLOR: cast(ThemeManager.Theme, self._theme).border_color.color,
+                    UV.BORDER_WIDTH: cast(ThemeManager.Theme, self._theme).border_radius,
+                    UV.ACCENT_COLOR: cast(ThemeManager.Theme, self._theme).accent.color,
+                    UV.ERROR_COLOR: cast(ThemeManager.Theme, self._theme).error.color,
+                    UV.WARNING_COLOR: cast(ThemeManager.Theme, self._theme).warning.color,
+                    UV.GRAY_COLOR: cast(ThemeManager.Theme, self._theme).grey.color,
+                    UV.OK_COLOR: cast(ThemeManager.Theme, self._theme).successful.color,
+                    UV.FONT_FACE: cast(ThemeManager.Theme, self._theme).font_face,
+                    UV.TITLE_FONT_FACE: cast(ThemeManager.Theme, self._theme).title_font_face,
+                    UV.TITLE_FONT_SIZE: cast(ThemeManager.Theme, self._theme).font_size_title,
+                    UV.LARGE_FONT_SIZE: cast(ThemeManager.Theme, self._theme).font_size_large,
+                    UV.NORML_FONT_SIZE: cast(ThemeManager.Theme, self._theme).font_size_normal,
+                    UV.SMALL_FONT_SIZE: cast(ThemeManager.Theme, self._theme).font_size_small,
                 }[arg]
 
             elif isinstance(arg, (list, tuple, set)):
@@ -115,7 +115,7 @@ class UI_OBJECT:
 
         return output
 
-    def apply_update_reqs(self, reqs: List[Any], *_, **kwargs) -> None:
+    def apply_update_reqs(self, reqs: List[Any], *_: Any, **kwargs: Any) -> None:
         self.toplevel.update()
         weo = kwargs.get('_wraplength_events_only', False)
 
@@ -137,17 +137,17 @@ class UI_OBJECT:
                     match command:
                         case UC.BACKGROUND:
                             assert len(args) == 1
-                            element.config(background=args[0])
+                            element.config(background=args[0])  # type: ignore
 
                         case UC.FOREGROUND:
                             assert len(args) == 1
-                            element.config(foreground=args[0])
+                            element.config(foreground=args[0])  # type: ignore
 
                         case UC.FONT:
                             assert len(args) == 2  # Only support family and size
                             assert isinstance(args[0], str) & isinstance(args[1], int)
 
-                            element.config(font=(*args,))
+                            element.config(font=(*args,))  # type: ignore
 
                         case UC.CUSTOM:
                             assert len(args) >= 1
@@ -161,7 +161,7 @@ class UI_OBJECT:
                         case UC.BORDER_COLOR:
                             assert len(args) == 1
 
-                            element.config(
+                            element.config(  # type: ignore
                                 highlightcolor=args[0],
                                 highlightbackground=args[0]
                             )
@@ -170,7 +170,7 @@ class UI_OBJECT:
                             assert len(args) == 1
                             assert isinstance(args[0], (float, int))
 
-                            element.config(
+                            element.config(  # type: ignore
                                 highlightthickness=args[0],
                                 borderwidth=args[0],
                                 bd=args[0],
@@ -179,18 +179,18 @@ class UI_OBJECT:
                         case UC.ACTIVE_BACKGROUND:
                             assert len(args) == 1
 
-                            element.config(activebackground=args[0])
+                            element.config(activebackground=args[0])  # type: ignore
 
                         case UC.ACTIVE_FOREGROUND:
                             assert len(args) == 1
 
-                            element.config(activeforeground=args[0])
+                            element.config(activeforeground=args[0])  # type: ignore
 
                         case UC.WRAP_LENGTH:
                             assert len(args) == 1
                             assert isinstance(args[0], (float, int))
 
-                            element.config(wraplength=args[0])
+                            element.config(wraplength=args[0])  # type: ignore
 
                         case _:
                             raise NotImplementedError('Update command.')
@@ -218,10 +218,10 @@ class UI_OBJECT:
                             f'[VERBOSE LOGGING ENABLED] Applied command {command} to {element}'
                         ))
 
-    def _update_ui_plugin(self, *_, **__) -> None:
+    def _update_ui_plugin(self, *_: Any, **__: Any) -> None:
         return  # Add your own code here.
 
-    def update_ui(self, *_, **kwargs) -> None:
+    def update_ui(self, *_: Any, **kwargs: Any) -> None:
         weo = kwargs.get('_wraplength_events_only', False)
 
         if not weo:

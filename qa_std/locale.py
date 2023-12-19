@@ -73,11 +73,11 @@ class EnglishUS(Locale):
     def __format__(self, spec: str) -> str:
         match spec:
             case 'lang':
-                return self.lang
+                return cast(str, self.lang)
             case 'region':
-                return self.region
+                return cast(str, self.region)
             case 'encoding':
-                return self.encoding
+                return cast(str, self.encoding)
             case _:
                 return self.__str__()
 

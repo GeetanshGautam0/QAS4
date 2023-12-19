@@ -73,7 +73,8 @@ class LogDataPacket:
 
 class Logger(Thread):
     @property
-    def FIO(self): return FileIO
+    def FIO(self) -> object:
+        return FileIO
 
     def __init__(self) -> None:
         self.thread = Thread
@@ -197,7 +198,7 @@ class Logger(Thread):
         
         data = b'%b %b' % (data, data_b)
         
-        {
+        {  # type: ignore
             LoggingLevel.L_ERROR:       ConsoleWriter.Write.error,
             LoggingLevel.L_WARNING:     ConsoleWriter.Write.warn,
             LoggingLevel.L_GENERAL:     ConsoleWriter.Write.write,

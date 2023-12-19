@@ -1,0 +1,2 @@
+[tool.mypy]
+exclude = ['qa_std/qa_error_manager.py']

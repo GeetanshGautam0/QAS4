@@ -8,17 +8,20 @@ Quizzing app v4 is an open source, Python-based application centered around the 
 
 ```shell
 # Run diagnostics and quit immediately
-python qa_main.py start-app _RDQ
+python qa_main.py start-app _RDQ --lapp
 
 # Run Quizzing App | Admin Tools
-python qa_main.py start-app admin_tools
+python qa_main.py start-app admin_tools --lapp
 
 # Run Quizzing App | Quizzing Form
-python qa_main.py start-app quizzing_app
+python qa_main.py start-app quizzing_app --lapp
 
 # Run Quizzing App Utilities (theme and diagnostics)
-python qa_main.pt start-app util
+python qa_main.pt start-app util --lapp
 ```
+
+The `--lapp` flag must be added to enable the app to boot. This is done to avoid a bug in
+the test and diagnostics system.
 
 ## Enabling/Disabling Verbose Logging
 _In `.conf\configuration.json`_:

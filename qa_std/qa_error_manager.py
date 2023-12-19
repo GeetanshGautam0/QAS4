@@ -31,7 +31,7 @@ import sys, traceback as tb, hashlib, time
 
 from .qa_def import ANSI, ExceptionCodes, File
 from .qa_console_write import Write as ConsoleWriter, stderr
-from typing import Optional, Any, overload, Union, cast, Type, List, Tuple
+from typing import Optional, Any, overload, Union, cast, Type, List, Tuple, Callable
 from dataclasses import dataclass
 import qa_msg_box as msg
 
@@ -42,7 +42,11 @@ _tb_buff = ['<%no_tb']
 _global_logger: Optional[Logger.Logger]
 
 
-def gen_codes(exception_class, exception_str, tb) -> Tuple[str, str, str]:
+def gen_codes(
+        exception_class: Any,
+        exception_str: str,
+        tb: Any
+) -> Tuple[str, str, str]:
     unique_hash = hashlib.md5(
         f"{time.ctime(time.time())}{tb}{exception_str}{exception_class.__class__.__name__}".encode()
     ).hexdigest()
@@ -54,7 +58,7 @@ def gen_codes(exception_class, exception_str, tb) -> Tuple[str, str, str]:
     return error_hash, unique_hash, std_hash
 
 
-def _cl_List(input_list: List[Any]) -> list:
+def _cl_List(input_list: List[Any]) -> List[Any]:
     output = []
     for item in input_list:
         if item not in output:
@@ -99,7 +103,7 @@ class _B(Exception):
         return exception_hex_c + exception_hex_v.split('x')[-1]
 
     def __repr__(self) -> str:
-        return f'Exceptions.{self.sc.__class__.__name__}(%s, EOff={self.sc.EOff}, ExpObj={self.EObj})' % ','.join(
+        return f'Exceptions.{self.sc.__class__.__name__}(%s, EOff={self.sc.EOff}, ExpObj={self.EObj})' % ','.join(  # type: ignore
             [str(d) for d in self.sc._a])  # type: ignore
 
     # def __str__(self) -> str:
@@ -112,7 +116,7 @@ class Exceptions:
     m2 = {}  # type: ignore
 
     @staticmethod
-    def _E_pKWARGS(cls, **kwargs) -> ExceptionCodes:
+    def _E_pKWARGS(cls: Any, **kwargs: Any) -> ExceptionCodes:
         global _EXC_MAP
 
         ExpObj = kwargs.get('ExpObj', ExceptionObject())
@@ -122,22 +126,20 @@ class Exceptions:
         cls.EObj = ExpObj
         cls.EOff = kwargs.get('ExpHexOffset', 0)
 
-        return ExpMode
+        return cast(ExceptionCodes, ExpMode)
 
     class ATTRIBUTE_ERROR(_B):
         @overload
         def __init__(self, error_str: str, *_b_args: Any, **_b_kwargs: Any) -> None: ...
 
         @overload
-        def __init__(self, error_str: str, error_type: str, *_b_args: Any, **_b_kwargs: Any) -> None: ...
+        def __init__(self, error_str: str, error_type: str, *_b_args: Any, **_b_kwargs: Any) -> None: ...  # type: ignore
 
         @overload
-        def __init__(self, error_str: str, error_type: str, attribute_name: str, *_b_args: Any,
-                     **_b_kwargs: Any) -> None: ...
+        def __init__(self, error_str: str, error_type: str, attribute_name: str, *_b_args: Any, **_b_kwargs: Any) -> None: ...  # type: ignore
 
         @overload
-        def __init__(self, error_str: str, error_type: str, attribute_name: str, additional_data: str, *_b_args: Any,
-                     **_b_kwargs: Any) -> None: ...
+        def __init__(self, error_str: str, error_type: str, attribute_name: str, additional_data: str, *_b_args: Any, **_b_kwargs: Any) -> None: ...  # type: ignore
 
         def __init__(self, error_str: str, error_type: Optional[str] = None, attribute_name: Optional[str] = None,
                      additional_data: Optional[str] = '', *_b_args: Any, **_b_kwargs: Any) -> None:
@@ -163,19 +165,25 @@ class Exceptions:
 
     class BASE_EXCEPTION(_B):
         @overload
-        def __init__(self, *_b_args, **_b_kwargs): ...
+        def __init__(self, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, exception_type: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, exception_type: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, exception_type: str, exception_data: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, exception_type: str, exception_data: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, exception_type: str, exception_data: str, additional_data: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, exception_type: str, exception_data: str, additional_data: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
-        def __init__(self, exception_type: str = 'unkE', exception_data: str = '', additional_data: str = '', *_b_args,
-                     **_b_kwargs):
+        def __init__(
+                self,
+                exception_type: str = 'unkE',
+                exception_data: str = '',
+                additional_data: str = '',
+                *_b_args: Any,
+                **_b_kwargs: Any
+        ) -> None:
             self.EOff: int = 0
             self.EObj: Optional[ExceptionObject] = None
             ExpMode = Exceptions._E_pKWARGS(self, **_b_kwargs)
@@ -201,28 +209,35 @@ class Exceptions:
 
     class CONFIG_ERROR(_B):
         @overload
-        def __init__(self, *_b_args, **_b_kwargs): ...
+        def __init__(self, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, key: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, key: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, key: str, value: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, key: str, value: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, key: str, value: str, exception_type: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, key: str, value: str, exception_type: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, key: str, value: str, exception_type: str, additional_data: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, key: str, value: str, exception_type: str, additional_data: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
-        def __init__(self, key: str = '<unknown>', value: str = '<unknown>', exception_type: str = '',
-                     additional_data: str = '', *_b_args, **_b_kwargs):
+        def __init__(
+                self,
+                key: str = '<unknown>',
+                value: str = '<unknown>',
+                exception_type: str = '',
+                additional_data: str = '',
+                *_b_args: Any,
+                **_b_kwargs: Any
+        ) -> None:
             self.EOff: int = 0
             self.EObj: Optional[ExceptionObject] = None
             ExpMode = Exceptions._E_pKWARGS(self, **_b_kwargs)
 
             super(Exceptions.CONFIG_ERROR, self).__init__(ExpMode, self, *_b_args, **_b_kwargs)
-            self.k, self.v, self.type, self.ad = key, value, exception_type, additional_data
+            self.k, self.v, self.type, self.ad = key, value, exception_type, additional_data  # type: ignore
             self._a = [key, value, exception_type, additional_data]
 
         def e_str(self) -> str:
@@ -252,8 +267,14 @@ class Exceptions:
         def __init__(self, error_str: str, file: str, additional_data: str):
             ...
 
-        def __init__(self, error_str: str, file: Optional[Union[str, File]] = None, additional_data: str = '', *_b_args,
-                     **_b_kwargs):
+        def __init__(
+                self,
+                error_str: str,
+                file: Optional[Union[str, File]] = None,
+                additional_data: str = '',
+                *_b_args: Any,
+                **_b_kwargs: Any
+        ) -> None:
             self.EOff: int = 0
             self.EObj: Optional[ExceptionObject] = None
 
@@ -293,19 +314,25 @@ class Exceptions:
 
     class ARITHMETIC_ERROR(_B):
         @overload
-        def __init__(self, *_b_args, **_b_kwargs): ...
+        def __init__(self, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, error_type: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, error_type: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, error_type: str, error_str: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, error_type: str, error_str: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
         @overload
-        def __init__(self, error_type: str, error_str: str, additional_data: str, *_b_args, **_b_kwargs): ...
+        def __init__(self, error_type: str, error_str: str, additional_data: str, *_b_args, **_b_kwargs): ...  # type: ignore
 
-        def __init__(self, error_type: Optional[str] = None, error_str: Optional[str] = None,
-                     additional_data: Optional[str] = None, *_b_args, **_b_kwargs):
+        def __init__(
+                self,
+                error_type: Optional[str] = None,
+                error_str: Optional[str] = None,
+                additional_data: Optional[str] = None,
+                *_b_args: Any,
+                **_b_kwargs: Any
+        ) -> None:
             self.EOff: int = 0
             self.EObj: Optional[ExceptionObject] = None
             ExpMode = Exceptions._E_pKWARGS(self, **_b_kwargs)
@@ -412,7 +439,12 @@ def SetExceptionMap(exception_code: ExceptionCodes, exception_class: Any) -> Non
     _EXC_MAP[exception_code] = exception_class
 
 
-def SetupException(exception: ExceptionObject, *exception_arguments, offset=0, **kwargs) -> Union[
+def SetupException(
+        exception: ExceptionObject,
+        *exception_arguments: Any,
+        offset: int = 0,
+        **kwargs: Any
+) -> Union[
     Exceptions.CONFIG_ERROR, Exceptions.ATTRIBUTE_ERROR, Exceptions.FILE_RELATED_ERROR, Exceptions.BASE_EXCEPTION, Exceptions.ATTRIBUTE_ERROR
 ]:
     global _EXC_MAP
@@ -441,7 +473,12 @@ def SetupException(exception: ExceptionObject, *exception_arguments, offset=0, *
         return SetupException(exception, *exception_arguments, offset, **kwargs)
 
 
-def InvokeException(exception: ExceptionObject, *exception_arguments, offset=0, **kwargs) -> None:
+def InvokeException(
+        exception: ExceptionObject,
+        *exception_arguments: Any,
+        offset: int = 0,
+        **kwargs: Any
+) -> None:
     global _EXC_MAP, _global_logger
 
     try:
@@ -557,11 +594,17 @@ _O_map = {
                         f'\n{ANSI.FG_BRIGHT_YELLOW}Traceback info{ANSI.RESET}: \n@traceback', (), {}),
 }
 
-Minf_EH_Md7182_eHookTasks_PRE = []
-Minf_EH_Md7182_eHookTasks = []
+Minf_EH_Md7182_eHookTasks_PRE: List[Tuple[Callable[[bool], bool], Callable[[Any], Any | None]]] = []
+Minf_EH_Md7182_eHookTasks: List[Tuple[Callable[[bool], bool], Callable[[Any], Any | None]]] = []
 
 
-def _O_exception_hook(exception_type: Type[BaseException], value, traceback, _invoke_exception=True, _re_inst=False):
+def _O_exception_hook(
+        exception_type: Type[BaseException],
+        value: Any,
+        traceback: Any,
+        _invoke_exception: bool = True,
+        _re_inst: bool = False
+) -> None:
     global _O_map, Minf_EH_Md7182_eHookTasks, Minf_EH_Md7182_eHookTasks_PRE
 
     _tb_buff.append("\n".join(tb.extract_tb(traceback).format()))
@@ -571,7 +614,7 @@ def _O_exception_hook(exception_type: Type[BaseException], value, traceback, _in
         for _i in range(1, 4):
             _tb_buff[_i - 1] = _tb_buff[_i]
 
-    def _O_eh_run_tasks(tasks, fatal):
+    def _O_eh_run_tasks(tasks: List[Any], fatal: bool) -> None:
         for (condition, task) in tasks:
             try:
                 if condition(fatal):
@@ -603,14 +646,15 @@ def _O_exception_hook(exception_type: Type[BaseException], value, traceback, _in
                     sN = sN.replace(key, rep, 1)
             L.append(sN)
 
-        for aa in args:
+        for aa in args:  # type: ignore
             sN = aa
             if isinstance(sN, str):
                 for key, rep in rMap.items():
                     sN = sN.replace(key, rep, 1)
             A.append(sN)
 
-        for ka, va in kwargs.items():  # Keys not modified
+        for ka, va in kwargs.items():  # type: ignore
+            # Keys are not modified
             vN = va
             if isinstance(vN, str):
                 for key, rep in rMap.items():
@@ -618,21 +662,22 @@ def _O_exception_hook(exception_type: Type[BaseException], value, traceback, _in
             K[ka] = vN
 
         if _invoke_exception:
-            InvokeException(ExceptionObject(exception_code, False), *L, *A, **{'offset': offset, **K})
+            InvokeException(ExceptionObject(exception_code, False), *L, *A, **{'offset': offset, **K})  # type: ignore
             _O_eh_run_tasks(Minf_EH_Md7182_eHookTasks, True)
             return None
 
         elif _re_inst:
             _O_eh_run_tasks(Minf_EH_Md7182_eHookTasks, False)
             ConsoleWriter.warn('Exception Hook: Weak handling enabled for this exception.')
-            return SetupException(ExceptionObject(exception_code, False), *L, *A, **{'offset': offset, **K})
+            return SetupException(ExceptionObject(exception_code, False), *L, *A, **{'offset': offset, **K})  # type: ignore
 
         else:
-            sys.__excepthook__(exception_type, value, traceback)
+            sys.__excepthook__(exception_type, value, traceback)  # type: ignore
 
     else:
-        sys.__excepthook__(exception_type, value, traceback)
+        sys.__excepthook__(exception_type, value, traceback)  # type: ignore
 
 
 def RedirectExceptionHandler() -> None:
-    sys.excepthook = sys.__excepthook__ if not (sys.excepthook == sys.__excepthook__) else _O_exception_hook
+    sys.excepthook = sys.__excepthook__ if not (sys.excepthook == sys.__excepthook__) else _O_exception_hook  # type: ignore
+
