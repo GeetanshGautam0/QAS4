@@ -1,19 +1,8 @@
 import hashlib, json, sys, os
 from datetime import datetime
-from dataclasses import dataclass
 from typing import Tuple
 
-from qa_std.qa_app_info import ConfigurationFile, Configuration, BuildType
-
-
-@dataclass
-class BIH:
-    S_REL_N: int
-    B_REL_N: int
-    A_REL_N: int
-
-    BUILD_ID: str
-    REL_DATE: str
+from qa_std.qa_app_info import ConfigurationFile, Configuration, BuildType, BIH
 
 
 def _write_bih_(bih: BIH) -> None:

@@ -83,6 +83,16 @@ class Configuration:
     _ver: int = 1
 
 
+@dataclass
+class BIH:
+    S_REL_N: int
+    B_REL_N: int
+    A_REL_N: int
+
+    BUILD_ID: str
+    REL_DATE: str
+
+
 class ConfigurationFile:
     """
 
@@ -100,6 +110,7 @@ class ConfigurationFile:
 
     loc: str = '.conf/configuration.json'
     config: Configuration
+    bih: BIH
 
     @staticmethod
     def load_file() -> None:
@@ -124,6 +135,17 @@ class ConfigurationFile:
         assert isinstance(ConfigurationFile.config.BI, str),            '0x0000:0x0004'
         assert isinstance(ConfigurationFile.config.locale, tuple),      '0x0000:0x0005'
         assert isinstance(ConfigurationFile.config.VLE, bool),          '0x0000:0x0006'
+
+        with open(r'.conf\_BIH.json', 'r') as _bih:
+            r_str = _bih.read()
+            _bih.close()
+
+        r_json = json.loads(r_str)
+
+        ConfigurationFile.bih = BIH(
+            S_REL_N=r_json['srel'], B_REL_N=r_json['brel'], A_REL_N=r_json['arel'],
+            BUILD_ID=r_json['bid'], REL_DATE=r_json['rel_date']
+        )
 
 
 ConfigurationFile.load_file()
