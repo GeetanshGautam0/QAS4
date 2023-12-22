@@ -1,5 +1,5 @@
 """
-FILE:           qa_std/qa_main.py
+FILE:           qa_lang/qa_strings.py
 AUTHOR:         Geetansh Gautam
 PROJECT:        Quizzing Application, version 4
 
