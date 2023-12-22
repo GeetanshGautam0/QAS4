@@ -80,6 +80,8 @@ class Configuration:
     locale: Tuple[str, str]             # Locale information
     VLE: bool                           # Verbose logging enabled
 
+    _ver: int = 1
+
 
 class ConfigurationFile:
     """
