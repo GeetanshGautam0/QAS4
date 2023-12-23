@@ -249,7 +249,7 @@ class SplashUI(UI_OBJECT):
         info = self._s[self._progress_tracker - 1]
 
         if AppInfo.ConfigurationFile.config.BT in (AppInfo.BuildType.BETA, AppInfo.BuildType.ALPHA):
-            info += f"\n{AppInfo.ConfigurationFile.config.BT.name} {AppInfo.ConfigurationFile.config.BI}"
+            info += f"\n{AppInfo.ConfigurationFile.config.BT.name} {AppInfo.ConfigurationFile.config.BI} ({AppInfo.ConfigurationFile.config.AVS})"
 
         self._t_upd()
 

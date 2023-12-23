@@ -1,5 +1,5 @@
 """
-FILE:           qa_std/qa_main.py
+FILE:           qa_main.py
 AUTHOR:         Geetansh Gautam
 PROJECT:        Quizzing Application, version 4
 
@@ -37,6 +37,7 @@ from qa_std import (
 from qa_file_io import file_io_manager
 from qa_ui import RunAdminTools, CreateSplashScreen
 from qa_ui.qa_ui_def import UI_OBJECT
+from qa_update import Update
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('AppInitializer', 'qa_main.py')
 
@@ -81,6 +82,7 @@ class AppManager:
 
         self.boot_steps = [
             'Running Diagnostics',
+            'Looking for Updates',
             'Initializing User Interface',
             'Boot Sequence Complete'
         ]
@@ -175,6 +177,12 @@ class AppManager:
         self.splash_screen.increment_progress()
 
         _run_essential_diagnostics_()
+
+        # Check for updates
+
+        self.splash_screen.increment_progress()
+
+        Update.check_for_updates()
 
         # Launch the app UI.
 
