@@ -20,6 +20,7 @@ DEPENDENCIES
 """
 
 import tkinter as tk
+from types import ModuleType
 from tkinter import ttk, Tk
 from typing import Optional, cast, Union, List, Any
 from enum import Enum
@@ -27,9 +28,11 @@ from enum import Enum
 import qa_std as STD
 from qa_std.qa_def import UpdateVariables as uV, UpdateCommand as uC
 from .qa_ui_def import UI_OBJECT
+from qa_lang import Strings
 
 
 _admin_tools_logger: Optional[STD.Logger] = None
+_admin_strings: ModuleType = Strings
 
 
 class FrameID(Enum):
@@ -107,13 +110,13 @@ class _UI(UI_OBJECT):
             _admin_tools_logger.write(ldp)
 
     def run(self) -> None:
-        global _admin_tools_logger
+        global _admin_tools_logger, _admin_strings
 
         self.toplevel.geometry('%dx%d+%d+%d' % (
             self.window_size[0], self.window_size[1], self.window_pos[0], self.window_pos[1]
         ))
 
-        self.toplevel.title('Quizzing Application 4 | Administrator Tools')
+        self.toplevel.title(f'Quizzing Application 4 | {_admin_strings.AppNames.AdminTools}')
         self.toplevel.iconbitmap(STD.AppInfo.File.AdminToolsAppICO)
 
         # Setup padding
@@ -167,6 +170,8 @@ class _UI(UI_OBJECT):
     #       Database Selection Frame
 
     def _set_frame_sel(self) -> None:
+        global _admin_strings
+
         # Configure the placement of elements
         self.selection_frame.pack(fill=tk.BOTH, expand=True)
 
@@ -174,7 +179,7 @@ class _UI(UI_OBJECT):
             self._theme_frame_sel()
 
             # This is the first time this function has been called; place the elements in the frame.
-            self.sel_frame_title.config(text='Administrator Tools')
+            self.sel_frame_title.config(text=_admin_strings.AppNames.AdminTools)
             self.sel_frame_title.pack(fill=tk.X, expand=True, padx=self.pad_x, pady=self.pad_y)  # type: ignore
 
         self._data[FrameID.SELECTION_FRAME]['_upt_req_submitted'] = True
@@ -257,9 +262,10 @@ class _UI(UI_OBJECT):
 ModuleScript = STD.AppPolicy.PolicyManager.Module('AdminTools', 'qa_admin_tools.py')
 
 
-def RunApp(app_instance: object, master: tk.Tk, logger: STD.Logger) -> _UI:
-    global _admin_tools_logger
+def RunApp(app_instance: object, master: tk.Tk, logger: STD.Logger, strings: ModuleType) -> _UI:
+    global _admin_tools_logger, _admin_strings
 
+    _admin_strings = strings
     _admin_tools_logger = logger
     return _UI(app_instance, master)
 

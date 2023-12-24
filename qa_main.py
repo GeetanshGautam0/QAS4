@@ -21,9 +21,8 @@ DEPENDENCIES
 
 """
 
-import sys, click
-import tkinter as tk
-
+import sys, click, tkinter as tk
+from types import ModuleType
 from tkinter import messagebox
 from typing import cast, Any, Dict, Callable, Optional, Type
 from enum import Enum
@@ -38,6 +37,7 @@ from qa_file_io import file_io_manager
 from qa_ui import RunAdminTools, CreateSplashScreen
 from qa_ui.qa_ui_def import UI_OBJECT
 from qa_update import Update
+from qa_lang import Strings
 
 ScriptPolicy = AppPolicy.PolicyManager.Module('AppInitializer', 'qa_main.py')
 
@@ -49,7 +49,7 @@ class AppID(Enum):
 
 
 class AppManager:
-    RunAppFunctions: Dict[AppID, Callable[[object, tk.Tk, Logger], UI_OBJECT]] = {
+    RunAppFunctions: Dict[AppID, Callable[[object, tk.Tk, Logger, ModuleType], UI_OBJECT]] = {
         AppID.AdminTools: RunAdminTools
     }
 
@@ -80,12 +80,7 @@ class AppManager:
         self._quit_signals = 0
         self._task_2739: Optional[str] = None
 
-        self.boot_steps = [
-            'Running Diagnostics',
-            'Looking for Updates',
-            'Initializing User Interface',
-            'Boot Sequence Complete'
-        ]
+        self.boot_steps = Strings.SplashUI.boot_steps
 
         assert app_id in AppID.__members__.values(), '0x0001:0x0000'
 
@@ -166,9 +161,25 @@ class AppManager:
 
         self.splash_screen.set_app_name(
             {
-                AppID.AdminTools: 'Administrator Tools',
-                AppID.Utilities: 'Utilities',
-                AppID.QuizzingForm: 'Quizzing Form'
+                AppID.AdminTools: Strings.AppNames.AdminTools,
+                AppID.Utilities: Strings.AppNames.Utilities,
+                AppID.QuizzingForm: Strings.AppNames.QuizzingForm
+            }[self.app_id]
+        )
+
+        # Translate
+
+        self.splash_screen.increment_progress()
+
+        Strings.translate('ge')
+        self.boot_steps = Strings.SplashUI.boot_steps
+        self.splash_screen._s = self.boot_steps
+
+        self.splash_screen.set_app_name(
+            {
+                AppID.AdminTools: Strings.AppNames.AdminTools,
+                AppID.Utilities: Strings.AppNames.Utilities,
+                AppID.QuizzingForm: Strings.AppNames.QuizzingForm
             }[self.app_id]
         )
 
@@ -188,7 +199,7 @@ class AppManager:
 
         self.splash_screen.increment_progress()
 
-        self._ui = AppManager.RunAppFunctions[self.app_id](self, self._tk_master, AppLogger)
+        self._ui = AppManager.RunAppFunctions[self.app_id](self, self._tk_master, AppLogger, Strings)
 
         # Boot sequence complete
 
