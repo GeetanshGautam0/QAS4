@@ -21,9 +21,8 @@ DEPENDENCIES
 
 """
 
-import sys, click
-import tkinter as tk
-
+import sys, click, tkinter as tk
+from types import ModuleType
 from tkinter import messagebox
 from typing import cast, Any, Dict, Callable, Optional, Type
 from enum import Enum
@@ -50,7 +49,7 @@ class AppID(Enum):
 
 
 class AppManager:
-    RunAppFunctions: Dict[AppID, Callable[[object, tk.Tk, Logger, Strings], UI_OBJECT]] = {
+    RunAppFunctions: Dict[AppID, Callable[[object, tk.Tk, Logger, ModuleType], UI_OBJECT]] = {
         AppID.AdminTools: RunAdminTools
     }
 

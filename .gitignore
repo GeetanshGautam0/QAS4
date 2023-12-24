@@ -2,3 +2,4 @@
 .vscode
 *.code-workspace
 *__pycache__
+qa_test.py

@@ -20,6 +20,7 @@ DEPENDENCIES
 """
 
 import tkinter as tk
+from types import ModuleType
 from tkinter import ttk, Tk
 from typing import Optional, cast, Union, List, Any
 from enum import Enum
@@ -31,7 +32,7 @@ from qa_lang import Strings
 
 
 _admin_tools_logger: Optional[STD.Logger] = None
-_admin_strings: Strings = Strings
+_admin_strings: ModuleType = Strings
 
 
 class FrameID(Enum):
@@ -261,7 +262,7 @@ class _UI(UI_OBJECT):
 ModuleScript = STD.AppPolicy.PolicyManager.Module('AdminTools', 'qa_admin_tools.py')
 
 
-def RunApp(app_instance: object, master: tk.Tk, logger: STD.Logger, strings: Strings) -> _UI:
+def RunApp(app_instance: object, master: tk.Tk, logger: STD.Logger, strings: ModuleType) -> _UI:
     global _admin_tools_logger, _admin_strings
 
     _admin_strings = strings
