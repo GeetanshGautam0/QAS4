@@ -29,6 +29,11 @@ HTTP = urllib3.PoolManager(
     retries=False,
     headers={'Cache-Control': 'no-cache', 'Pragma': 'no-cache', 'Expires': 'Thu, 01 Jan 1970 00:00:00 GMT'}
 )
+CHANNELS = {
+    AppInfo.BuildType.ALPHA: URL % 'alpha',
+    AppInfo.BuildType.BETA: URL % 'beta',
+    AppInfo.BuildType.STABLE: URL % 'stable',
+}
 
 
 def tr(f: Callable[[Any], Any], *args: Any, **kwargs: Any) -> Tuple[bool, Any]:

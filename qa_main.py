@@ -31,7 +31,7 @@ import qa_std.qa_diagnostics as Diagnostics
 from qa_std import (
     AppPolicy, NonvolatileFlags, ConsoleWriter,
     Logger, LoggingLevel, LogDataPacket,
-    qa_def, ErrorManager, ThemeManager
+    qa_def, ErrorManager, ThemeManager, LocaleManager
 )
 from qa_file_io import file_io_manager
 from qa_ui import RunAdminTools, CreateSplashScreen
@@ -171,7 +171,7 @@ class AppManager:
 
         self.splash_screen.increment_progress()
 
-        Strings.translate('ge')
+        Strings.translate(str(LocaleManager.locale.lang))
         self.boot_steps = Strings.SplashUI.boot_steps
         self.splash_screen._s = self.boot_steps
 
