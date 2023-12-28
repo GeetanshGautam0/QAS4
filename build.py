@@ -86,10 +86,13 @@ def _gen_bih_(
         case BuildType.BETA:
             _bih.B_REL_N += 1
             b += 1
+            al += 1
 
         case BuildType.STABLE:
             _bih.S_REL_N += 1
             s += 1
+            b += 1
+            al += 1
 
         case _:
             raise NotImplementedError
