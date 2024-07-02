@@ -89,8 +89,9 @@ class BIH:
     B_REL_N: int
     A_REL_N: int
 
-    BUILD_ID: str
-    REL_DATE: str
+    A_DC: str
+    B_DC: str
+    S_DC: str
 
 
 class ConfigurationFile:
@@ -143,8 +144,12 @@ class ConfigurationFile:
         r_json = json.loads(r_str)
 
         ConfigurationFile.bih = BIH(
-            S_REL_N=r_json['srel'], B_REL_N=r_json['brel'], A_REL_N=r_json['arel'],
-            BUILD_ID=r_json['bid'], REL_DATE=r_json['rel_date']
+            S_REL_N = r_json['r_stbl']['n'],
+            S_DC    = r_json['r_stbl']['dc'],
+            B_REL_N = r_json['r_beta']['n'],
+            B_DC    = r_json['r_beta']['dc'],
+            A_REL_N = r_json['r_alph']['n'],
+            A_DC    = r_json['r_alph']['dc']
         )
 
 

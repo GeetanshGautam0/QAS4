@@ -7,11 +7,21 @@ from qa_std.qa_app_info import ConfigurationFile, Configuration, BuildType, BIH
 
 def _write_bih_(bih: BIH) -> None:
     o = {
-        'srel': bih.S_REL_N,
-        'brel': bih.B_REL_N,
-        'arel': bih.A_REL_N,
-        'bid': bih.BUILD_ID,
-        'rel_date': bih.REL_DATE
+        "r_stbl":
+        {
+            "n": bih.S_REL_N,
+            "dc": bih.S_DC
+        },
+        "r_beta":
+        {
+            "n": bih.B_REL_N,
+            "dc": bih.B_DC
+        },
+        "r_alph":
+        {
+            "n": bih.A_REL_N,
+            "dc": bih.A_DC
+        }
     }
 
     with open(r'.conf\_BIH.json', 'w') as _bih:
@@ -29,8 +39,12 @@ def _load_bih_() -> BIH:
     r_json = json.loads(r_str)
 
     return BIH(
-        S_REL_N=r_json['srel'], B_REL_N=r_json['brel'], A_REL_N=r_json['arel'],
-        BUILD_ID=r_json['bid'], REL_DATE=r_json['rel_date']
+        S_REL_N=r_json['r_stbl']['n'],
+        S_DC=r_json['r_stbl']['dc'],
+        B_REL_N=r_json['r_beta']['n'],
+        B_DC=r_json['r_beta']['dc'],
+        A_REL_N=r_json['r_alph']['n'],
+        A_DC=r_json['r_alph']['dc']
     )
 
 
@@ -73,37 +87,42 @@ def _gen_bih_(
     _conf = _load_config_()
 
     bl = _conf.AVS.split('.')
-    assert bl.pop(0) == '4'
-    assert len(bl) == 3
+    assert bl.pop(0) == '4'                     # Make sure that this configuration is for the 4th version of the app
+    assert len(bl) == 3                         # Version info
 
     s, b, al = map(lambda x: int(x), bl)
 
+    # Date code
+    _dc = int(_rel_date.strftime('%y%m%d%H%M%S'))
+
+    # Build ID
+    _bid = build_type.name[0]
+    _bid += f"_{_dc}_{hashlib.md5(f'{_dc}'.encode()).hexdigest()[-8::]}"
+
     match build_type:
         case BuildType.ALPHA:
-            _bih.A_REL_N += 1
             al += 1
+            _bih.A_DC = _bid
 
         case BuildType.BETA:
-            _bih.B_REL_N += 1
             b += 1
-            al += 1
+            _bih.B_DC = _bid
 
         case BuildType.STABLE:
-            _bih.S_REL_N += 1
             s += 1
-            b += 1
-            al += 1
+            _bih.S_DC = _bid
 
         case _:
             raise NotImplementedError
 
-    _bid = build_type.name[0]
-    _bid += f"_{hashlib.md5(f'{_rel_date}'.encode()).hexdigest()[-8::]}{_rel_date.strftime('%H%M')}"
+    _bih.A_REL_N = al
+    _bih.B_REL_N = b
+    _bih.S_REL_N = s
 
     _bih.BUILD_ID = _bid
-    _bih.REL_DATE = _rel_date.strftime('%b %d, %Y %H:%M:%S')
 
     avs = f"4.{s}.{b}.{al}"
+
     _conf.AVS = avs
     _conf.BT = build_type
     _conf.BI = _bid
@@ -117,6 +136,9 @@ if __name__ == "__main__":
     print('     --stable................. for a stable release')
     print('     --beta................... for a beta release')
     print('     --alpha.................. for an alpha release')
+    print('')
+    print('  Other options')
+    print('     --no-tests............... do not run tests')
 
     assert \
         '--stable' in sys.argv or \
@@ -139,15 +161,21 @@ if __name__ == "__main__":
     bih, conf = _gen_bih_(bt)
 
     _write_bih_(bih)
-    print(f'... Wrote to BIH: {bih.BUILD_ID} @ {bih.REL_DATE}')
+    print(f'... Wrote to BIH: {conf.BI}')
 
     _write_config_(conf)
     print(f'... Wrote to CONF')
 
     print(f'... Running MyPy tests.')
-    os.system('mypy --pretty --disallow-untyped-defs --disallow-incomplete-defs --check-untyped-defs --no-implicit-optional --warn-redundant-casts --warn-return-any --disallow-untyped-globals --allow-redefinition --show-error-context --show-column-numbers --show-error-codes --pretty --disallow-any-generics .')
+    os.system(
+        'mypy --pretty --disallow-untyped-defs --disallow-incomplete-defs --check-untyped-defs '
+        '--no-implicit-optional --warn-redundant-casts --warn-return-any --disallow-untyped-globals '
+        '--allow-redefinition --show-error-context --show-column-numbers --show-error-codes --pretty '
+        '--disallow-any-generics .'
+    )
 
-    print(f'... Running PyTest tests.')
-    os.system('pytest -vv .')
+    if '--no-tests' not in sys.argv:
+        print(f'... Running PyTest tests.')
+        os.system('pytest -vv .')
 
     sys.exit(0)
