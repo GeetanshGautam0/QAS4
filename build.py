@@ -101,15 +101,15 @@ def _gen_bih_(
 
     match build_type:
         case BuildType.ALPHA:
-            al += 1
+            al += 1 if '--DNI' not in sys.argv else 0
             _bih.A_DC = _bid
 
         case BuildType.BETA:
-            b += 1
+            b += 1 if '--DNI' not in sys.argv else 0
             _bih.B_DC = _bid
 
         case BuildType.STABLE:
-            s += 1
+            s += 1 if '--DNI' not in sys.argv else 0
             _bih.S_DC = _bid
 
         case _:
@@ -119,7 +119,7 @@ def _gen_bih_(
     _bih.B_REL_N = b
     _bih.S_REL_N = s
 
-    _bih.BUILD_ID = _bid
+    # _bih.BUILD_ID = _bid
 
     avs = f"4.{s}.{b}.{al}"
 
@@ -139,6 +139,7 @@ if __name__ == "__main__":
     print('')
     print('  Other options')
     print('     --no-tests............... do not run tests')
+    print('     --DNI.................... do not increment build n-value')
 
     assert \
         '--stable' in sys.argv or \
@@ -161,7 +162,7 @@ if __name__ == "__main__":
     bih, conf = _gen_bih_(bt)
 
     _write_bih_(bih)
-    print(f'... Wrote to BIH: {conf.BI}')
+    print(f'... Wrote to BIH: {conf.BI} @ {conf.AVS}')
 
     _write_config_(conf)
     print(f'... Wrote to CONF')
