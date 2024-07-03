@@ -18,7 +18,7 @@ DEPENDENCIES
 """
 
 import urllib3, sys, json, traceback as tb, time
-from typing import Optional, Callable, Any, Tuple, Dict, cast
+from typing import Optional, Callable, Any, Tuple, Dict, cast, Union
 
 from qa_std import AppInfo
 
@@ -44,7 +44,7 @@ def tr(f: Callable[[Any], Any], *args: Any, **kwargs: Any) -> Tuple[bool, Any]:
         return False, E
 
 
-def check_for_updates() -> Tuple[bool, str]:
+def check_for_updates() -> Tuple[bool, str, str]:
     global URL, HTTP
 
     """
@@ -72,18 +72,18 @@ def check_for_updates() -> Tuple[bool, str]:
 
     if not success:
         sys.stderr.write(f'[HTTP GET ERROR] Failed to access URL: {str(res)}')
-        return False, AppInfo.ConfigurationFile.config.BI
+        return False, AppInfo.ConfigurationFile.config.BI, AppInfo.ConfigurationFile.config.AVS
 
     http_response = cast(urllib3.BaseHTTPResponse, res)
     if http_response.status != 200:
         sys.stderr.write(f'[HTTP GET ERROR] Failed to access URL: Status {http_response.status}')
-        return False, AppInfo.ConfigurationFile.config.BI
+        return False, AppInfo.ConfigurationFile.config.BI, AppInfo.ConfigurationFile.config.AVS
 
     success, js = tr(json.loads, tr(http_response.data.decode)[1])  # type: ignore
 
     if not success:
         sys.stderr.write(f'[HTTP GET ERROR] Failed to access URL: JSON Decode Error')
-        return False, AppInfo.ConfigurationFile.config.BI
+        return False, AppInfo.ConfigurationFile.config.BI, AppInfo.ConfigurationFile.config.AVS
 
     j = cast(Dict[str, Any], js)
 
@@ -101,23 +101,62 @@ def check_for_updates() -> Tuple[bool, str]:
         time.sleep(0.1)
         sys.stderr.writelines(['\t |\t%s\r\n' % s for s in tb.format_exc().split('\n')])
 
-        return False, AppInfo.ConfigurationFile.config.BI         # Cannot update app so we can return.
+        return False, AppInfo.ConfigurationFile.config.BI, AppInfo.ConfigurationFile.config.AVS
 
     # else:
 
-    # TODO
-    #       Once an update stream is set, use the information to check
-    #       arel, brel, and/or srel
-
-    # Load the date codes of arel, brel, and srel.
-    # An update is available if an update is issued to the selected "stream" or a more stable stream.
+    # Load the configuration info from the BIH file data downloaded.
 
     bl = AppInfo.ConfigurationFile.config.AVS.split('.')
     assert bl.pop(0) == '4'  # Make sure that this configuration is for the 4th version of the app
     assert len(bl) == 3      # Version info
 
-    vc = map(lambda x: int(x), bl)  # S, B, A
+    vc = list(map(lambda x: int(x), bl))[::-1]  # [A, B, S]
     pop = AppInfo.ConfigurationFile.config.BT.value  # Items to pop
+    tc:  Union[Tuple[int], Tuple] = ()  # type: ignore
 
-    for i in range(3 - pop):
-        print(srv[i])
+    for i in range(pop, 3):
+        sys.stdout.write(f"[UPDT]    '{AppInfo.BuildType._value2member_map_[i].name.upper()}': S{srv[i]}:C{vc[i]}\r\n")
+        if srv[i] > vc[i]:      # New version
+            tc = (*tc, i)
+
+    def _get_avs_and_bi(s: int, _j: Dict[str, Any]) -> Tuple[str, str]:
+        avs = '4.%s' % '.'.join([(str(j) if i != s else str(srv[s])) for i, j in enumerate(vc)][::-1])
+        bi = _j['r_%s' % {
+            AppInfo.BuildType.STABLE.value: 'stbl',
+            AppInfo.BuildType.BETA.value: 'beta',
+            AppInfo.BuildType.ALPHA.value: 'alph'
+        }[s]]['dc']
+
+        return avs, bi
+
+    match len(tc):
+        case 0:
+            # up to date
+            return False, AppInfo.ConfigurationFile.config.BI, AppInfo.ConfigurationFile.config.AVS
+
+        case 1:
+            # One new stream
+            avs, bi = _get_avs_and_bi(tc[0], j); del tc
+            sys.stdout.write(f"[UPDT] Found new version {avs} ({bi}).\r\n")
+
+            return True, bi, avs
+
+        case 2 | 3:
+            # Reduce the list of updates to 1: the latest release that complies with the stability restriction(s) set
+            #       forth by the user in config.
+
+            _all = [_get_avs_and_bi(tc[i], j) for i in tc]
+            _avs, _bi = list(map(lambda l: l[0], _all)), list(map(lambda l: l[1], _all))
+            _dc = list(map(lambda l: int(l.split('_')[1]), [b if b != '' else '_0_' for b in _bi]))
+
+            avs, bi = {k: (a, b) for (k, a, b) in zip(_dc, _avs, _bi)}[max(*_dc)]
+
+            # TODO: Make the above reduction more efficient/faster
+            #   Importance: low (max 3 items to reduce)
+
+            return True, bi, avs
+
+        case _:
+            sys.stderr.write(f"[WARN] Unexpected behaviour in updater (0x01: {len(tc)})\r\n")
+            return False, AppInfo.ConfigurationFile.config.BI, AppInfo.ConfigurationFile.config.AVS
