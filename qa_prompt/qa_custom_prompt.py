@@ -93,13 +93,24 @@ class Theme:
     GR: str
     AC: str
     FF: str
-    FS: int
+    FS_M: int
+    FS_L: int
+    FS_S: int
+    FS_T: int
 
 
 _theme_def_light = Theme(
     BG='#FFFFFF',
     FG='#000000',
-    
+    RD='#E01A00',
+    YE='#D6A630',
+    GR='#138811',
+    AC='#2DB2E7',
+    FF='Montserrat Black',
+    FS_T=29,
+    FS_L=20,
+    FS_M=14,
+    FS_S=10
 )
 
 
@@ -150,7 +161,7 @@ class Prompt:
 
             self.BUTTONS = _b
 
-    @overload(__init__)
+    @overload(__init__)  # type: ignore
     def __init__(
             self,
             prompt_type: PromptType,
@@ -160,7 +171,7 @@ class Prompt:
     ) -> None:
         ...
 
-    @overload(__init__)
+    @overload(__init__)  # type: ignore
     def __init__(
             self,
             prompt_type: PromptType,
@@ -182,10 +193,8 @@ class _PROMPT:
         self.theme: Optional[Theme] = None
 
     def log(self, ll: _LoggingLevel, data: str) -> None:
-
-
+        pass
 
 
 if __name__ == "__main__":
     ScriptPolicy.run_as_main()
-
